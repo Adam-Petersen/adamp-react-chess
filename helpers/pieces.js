@@ -1,15 +1,15 @@
-import bishop_black from 'images/bishop_black.svg';
-import bishop_white from 'images/bishop_white.svg';
-import king_black from 'images/king_black.svg';
-import king_white from 'images/king_white.svg';
-import knight_black from 'images/knight_black.svg';
-import knight_white from 'images/knight_white.svg';
-import pawn_black from 'images/pawn_black.svg';
-import pawn_white from 'images/pawn_white.svg';
-import queen_black from 'images/queen_black.svg';
-import queen_white from 'images/queen_white.svg';
-import rook_black from 'images/rook_black.svg';
-import rook_white from 'images/rook_white.svg';
+import bishop_black from '../images/bishop_black.svg';
+import bishop_white from '../images/bishop_white.svg';
+import king_black from '../images/king_black.svg';
+import king_white from '../images/king_white.svg';
+import knight_black from '../images/knight_black.svg';
+import knight_white from '../images/knight_white.svg';
+import pawn_black from '../images/pawn_black.svg';
+import pawn_white from '../images/pawn_white.svg';
+import queen_black from '../images/queen_black.svg';
+import queen_white from '../images/queen_white.svg';
+import rook_black from '../images/rook_black.svg';
+import rook_white from '../images/rook_white.svg';
 
 const pieces = {
   bishop_black: {

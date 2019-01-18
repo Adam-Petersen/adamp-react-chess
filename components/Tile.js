@@ -1,5 +1,5 @@
 import React from 'react';
-import Piece from 'components/Piece';
+import Piece from './Piece';
 
 class Tile extends React.Component {
   constructor(props) {
@@ -14,7 +14,7 @@ class Tile extends React.Component {
 
   render() {
     return (
-      <div 
+      <div
         className={`tile ${this.props.tileColor} ${this.props.highlighted === true ? 'highlighted' : ''} ${this.props.debug && this.props.possibleTarget ? 'target' : ''}`}
         onClick={this.handleClick}
       >

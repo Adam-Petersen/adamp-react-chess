@@ -1,7 +1,7 @@
 import React from 'react';
-import Tile from 'components/Tile';
-import pieces from 'helpers/pieces';
-import rules from 'helpers/rules';
+import Tile from './Tile';
+import pieces from '../helpers/pieces';
+import rules from '../helpers/rules';
 
 class Board extends React.Component {
   constructor(props) {
@@ -67,17 +67,17 @@ class Board extends React.Component {
           this.props.changeTurn({check: false});
         }
         newState.highlightedTile = null;
-      } 
+      }
       else {
         newState.highlightedTile = null;
       }
-    } 
+    }
     else if (clickedTile.piece && clickedTile.piece.color === this.props.turn) {
       newState.highlightedTile = clickedTile;
     }
-    
+
     this.debugSetHighlights(newState.board, newState.highlightedTile)
-    
+
     console.log('setting state');
     this.setState({
       ...this.state,
