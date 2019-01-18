@@ -1,0 +1,54 @@
+.tile {
+  position: relative;
+  height: 100px;
+  width: 100px; }
+  .dark {
+    background-color: #825201; }
+  .light {
+    background-color: #b69b4c; }
+  .highlighted {
+    outline: 5px solid #38fc11;
+    outline-offset: -5px;
+  }
+  .target {
+    outline: 5px solid blue;
+    outline-offset: -5px;
+  }
+
+table, th, td {
+  table-layout: fixed;
+  margin: 0px;
+  padding: 0px;
+  border-spacing: 0;
+  height: 100px;
+  width: 100px;
+}
+
+p {
+  margin: 0px;
+  padding: 0px;
+}
+
+img {
+  width: 100px;
+  height: 100px;
+  overflow: auto;
+  margin: auto;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0
+}
+
+.checkmate {
+  opacity: 0.5;
+}
+
+.checkmate-text {
+  position: absolute;
+  margin-top: 350px;
+  width: 800px;
+  font-size: 40px;
+  color: #000;
+  text-align: center;
+  font-weight: bold;
+}
+
