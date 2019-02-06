@@ -1,6 +1,8 @@
 import React from 'react';
 import TwoPlayerBoard from './TwoPlayerBoard';
 import GameModeSelect from './GameModeSelect';
+import PlayerName from './PlayerName'
+
 
 class Game extends React.Component {
   constructor(props) {
@@ -8,7 +10,7 @@ class Game extends React.Component {
 
     this.state = {
       mode: null,
-      turn: 'white',
+      turn: null,
       check: false,
       checkMate: false,
       debug: false,
@@ -17,6 +19,16 @@ class Game extends React.Component {
     this.changeTurn = this.changeTurn.bind(this);
     this.toggleDebug = this.toggleDebug.bind(this);
     this.onModeClick = this.onModeClick.bind(this);
+    this.changePlayer1 = this.changePlayer1.bind(this);
+    this.changePlayer2 = this.changePlayer2.bind(this);
+  }
+
+  changePlayer1(name) {
+
+  }
+
+  changePlayer2(name) {
+
   }
 
   changeTurn(vals) {
@@ -31,12 +43,18 @@ class Game extends React.Component {
   }
 
   onModeClick(mode) {
-    this.setState({...this.state, mode: mode});
+    this.setState({...this.state, mode: mode, turn: "white"});
   }
 
   render() {
     return (
       <div className="game">
+        <PlayerName
+          value={"Player 2"}
+          onChange={this.changePlayer2}
+          color="dark"
+          upNext={this.state.turn == "black"}
+        />
         {!this.state.mode &&
           <GameModeSelect
             onClick={this.onModeClick}
@@ -44,8 +62,6 @@ class Game extends React.Component {
         }
         {this.state.mode == "two" &&
           <div className="two-board">
-            <button onClick={this.toggleDebug}>Debug Mode</button>
-            <p>Color: {this.state.turn}</p>
             {this.state.checkMate &&
               <p className="checkmate-text">
                 Checkmate, {this.state.turn === 'white' ? 'black' : 'white'} wins!
@@ -59,6 +75,12 @@ class Game extends React.Component {
             />
           </div>
         }
+        <PlayerName
+          value="Player 1"
+          onChange={this.changePlayer1}
+          color="light"
+          upNext={this.state.turn == "white"}
+        />
       </div>
     );
   }
