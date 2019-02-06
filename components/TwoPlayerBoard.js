@@ -3,7 +3,7 @@ import Tile from './Tile';
 import pieces from '../helpers/pieces';
 import rules from '../helpers/rules';
 
-class Board extends React.Component {
+class TwoPlayerBoard extends React.Component {
   constructor(props) {
     super(props);
 
@@ -201,4 +201,4 @@ class Board extends React.Component {
   }
 }
 
-export default Board;
+export default TwoPlayerBoard;
