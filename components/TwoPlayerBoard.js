@@ -11,27 +11,57 @@ class TwoPlayerBoard extends React.Component {
     this.moves = rules.setNewBoard(startBoard, this.props.turn);
     this.debugSetHighlights(startBoard);
 
-    this.tileDraggedFrom;
-
     this.state = {
       board: startBoard,
       highlightedTile: null,
+      reset: null,
       checkMate: false,
     };
 
     this.handleClick = this.handleClick.bind(this);
-    //this.handleDrag = this.handleDrag.bind(this);
+    this.handleDrag = this.handleDrag.bind(this);
+    this.highlightTargets = this.highlightTargets.bind(this);
   }
 
-  /*handleDrag(startRow, startCol, finRow, finCol) {
-    console.log(startRow);
-    console.log(startCol);
-    console.log(finRow);
-    console.log(finCol);
+  handleDrag(startRow, startCol, finRow, finCol) {
+    var startTile = this.state.board[startRow][startCol];
+    var finTile = this.state.board[finRow][finCol];
+    var newState = {};
 
-    this.tileDraggedFrom = this.state.board[startRow][startCol];
-    this.handleClick(finRow, finCol);
-  } */
+    if (rules.isValidMove(startTile, finTile)) {
+      var newBoard = this.copyBoard(this.state.board);
+      newBoard[startRow][startCol] = {...startTile, piece: null};
+      newBoard[finRow][finCol] = {...finTile, piece: startTile.piece }
+      this.moves = rules.setNewBoard(newBoard);
+      newState.board = newBoard;
+
+      if (rules.isCheckMate()) {
+        newState.checkMate = true;
+        this.props.changeTurn({checkMate: true});
+      }
+      else if (rules.isCheck()) {
+        this.props.changeTurn({check: true});
+      }
+      else {
+        this.props.changeTurn({check: false});
+      }
+      newState.highlightedTile = null;
+
+    } else {
+      newState.board = this.state.board;
+      newState.reset = startTile;
+      newState.highlightedTile = startTile;
+    }
+
+    this.debugSetHighlights(newState.board, newState.highlightedTile);
+    this.setTargetHighlights(newState.board, newState.highlightedTile);
+
+    this.setState({
+      ...this.state,
+      ...newState,
+    });
+
+  }
 
   handleClick(row, col) {
     if (this.state.checkMate) {
@@ -39,7 +69,7 @@ class TwoPlayerBoard extends React.Component {
     }
 
     var newState = { board: this.state.board };
-    var highlightedTile = this.tileDraggedFrom ? this.tileDraggedFrom : this.state.highlightedTile;
+    var highlightedTile = this.state.highlightedTile;
     let clickedTile = this.state.board[row][col];
 
     if (highlightedTile) {
@@ -76,12 +106,22 @@ class TwoPlayerBoard extends React.Component {
       newState.highlightedTile = clickedTile;
     }
 
-    this.debugSetHighlights(newState.board, newState.highlightedTile)
+    this.debugSetHighlights(newState.board, newState.highlightedTile);
+    this.setTargetHighlights(newState.board, newState.highlightedTile);
 
-    console.log('setting state');
     this.setState({
       ...this.state,
       ...newState,
+    });
+  }
+
+  highlightTargets(row, col) {
+    var newBoard = this.copyBoard(this.state.board);
+    this.setTargetHighlights(newBoard, newBoard[row][col]);
+    this.setState({
+      ...this.state,
+      board: newBoard,
+      highlightedTile: newBoard[row][col],
     });
   }
 
@@ -100,10 +140,14 @@ class TwoPlayerBoard extends React.Component {
                     col={j}
                     piece={this.state.board[i][j].piece}
                     handleClick= {this.handleClick}
-                    //handleDrag= {this.handleDrag}
+                    handleDrag= {this.handleDrag}
+                    highlightTargets = {this.highlightTargets}
                     highlighted= {this.state.highlightedTile && this.state.highlightedTile.id === this.state.board[i][j].id}
                     possibleTarget = {this.state.board[i][j].possibleTarget}
                     debug = {this.props.debug}
+                    reset = { this.state.reset && this.state.reset.id == this.state.board[i][j].id }
+                    tileSize = {this.props.tileSize}
+                    turn = {this.props.turn}
                   />
                 </td>
               )}
@@ -191,10 +235,20 @@ class TwoPlayerBoard extends React.Component {
   }
 
   debugSetHighlights(board, highlightedTile) {
-    board.forEach((row, i) => row.forEach((col, j) => board[i][j].possibleTarget = false));
+    board.forEach((row, i) => row.forEach((col, j) => board[i][j].debugTarget = false));
 
     this.moves.forEach(move => {
       if (!highlightedTile || move.startTile.id === highlightedTile.id) {
+        board[move.targetTile.row][move.targetTile.col].debugTarget = true;
+      }
+    });
+  }
+
+  setTargetHighlights(board, highlightedTile) {
+    board.forEach((row, i) => row.forEach((col, j) => board[i][j].possibleTarget = false));
+
+    this.moves.forEach(move => {
+      if (highlightedTile && move.startTile.id === highlightedTile.id) {
         board[move.targetTile.row][move.targetTile.col].possibleTarget = true;
       }
     });

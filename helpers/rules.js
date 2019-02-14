@@ -38,7 +38,6 @@ var Rules = (function(){
     }
     });
 
-    console.log(check);
   }
 
   var isCheckMate = function (board, validMoves) {
@@ -50,7 +49,7 @@ var Rules = (function(){
   }
 
   function generateValidMoves() {
-    var moves = generateValidBishopMoves(board).concat(
+    var moves = generateValidBishopMoves().concat(
            generateValidKingMoves()).concat(
            generateValidKnightMoves()).concat(
            generateValidPawnMoves()).concat(
@@ -208,18 +207,18 @@ var Rules = (function(){
     livingPawns.forEach(function(pawnTile){
       let rowInc = pawnTile.piece.color === 'white' ? -1 : 1;
       let startRow = pawnTile.piece.color === 'white' ? 6 : 1;
-      let nextTile = board[pawnTile.row + rowInc][pawnTile.col];
+      let nextTile = isValidTile(pawnTile.row + rowInc, pawnTile.col) ? board[pawnTile.row + rowInc][pawnTile.col] : null;
       let diagLeftTile = isValidTile(pawnTile.row + rowInc, pawnTile.col - 1) ? board[pawnTile.row + rowInc][pawnTile.col - 1] : null;
       let diagRightTile = isValidTile(pawnTile.row + rowInc, pawnTile.col + 1) ? board[pawnTile.row + rowInc][pawnTile.col + 1] : null;
 
-      if (!nextTile.piece) {
+      if (nextTile && !nextTile.piece) {
         moves.push({
           startTile: pawnTile,
           targetTile: nextTile,
         });
 
-        let pastNextTile = board[nextTile.row + rowInc][nextTile.col];
-        if (pawnTile.row === startRow && !pastNextTile.piece) {
+        let pastNextTile = isValidTile(nextTile.row + rowInc, nextTile.col) ? board[nextTile.row + rowInc][nextTile.col] : null;
+        if (pastNextTile && !pastNextTile.piece && pawnTile.row === startRow) {
           moves.push({
             startTile: pawnTile,
             targetTile: pastNextTile,

@@ -8,6 +8,8 @@ class Game extends React.Component {
   constructor(props) {
     super(props);
 
+    this.tileSize = 75;
+
     this.state = {
       mode: null,
       turn: null,
@@ -72,6 +74,7 @@ class Game extends React.Component {
               checkMate={this.state.checkMate}
               turn={this.state.turn}
               debug={this.state.debug}
+              tileSize={this.tileSize}
             />
           </div>
         }
