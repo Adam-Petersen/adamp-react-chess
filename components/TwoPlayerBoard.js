@@ -55,7 +55,7 @@ class TwoPlayerBoard extends React.Component {
 
     this.debugSetHighlights(newState.board, newState.highlightedTile);
     this.setTargetHighlights(newState.board, newState.highlightedTile);
-
+    
     this.setState({
       ...this.state,
       ...newState,

@@ -19,7 +19,7 @@ class Tile extends React.Component {
         className={`tile ${this.props.tileColor} ${this.props.debug && this.props.debugTarget ? 'debug-target' : ''}`}
         onClick={this.props.piece ? null : this.handleClick}
       >
-        {this.props.possibleTarget &&
+        {!this.props.piece && this.props.possibleTarget &&
           <div className="dot"></div>
         }
         {this.props.piece &&
@@ -32,7 +32,8 @@ class Tile extends React.Component {
             col={this.props.col}
             reset={this.props.reset}
             tileSize={this.props.tileSize}
-            disableDrag={this.props.piece && this.props.piece.color !== this.props.turn }
+            disableDrag={this.props.piece && this.props.piece.color !== this.props.turn}
+            possibleTarget={this.props.possibleTarget}
           />
         }
       </div>

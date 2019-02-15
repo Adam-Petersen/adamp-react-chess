@@ -14,15 +14,14 @@ class Piece extends React.Component {
     this.onDrag = this.onDrag.bind(this);
   }
 
+
   handleClick(e) {
     if (!this.doneDragging) {
-      //console.log("Calling handlClick");
       this.props.handleClick(this.props.row, this.props.col);
     } else {
       this.doneDragging = false;
     }
   }
-
 
   onStop(e, drag) {
     if (!this.dragging) {
@@ -57,7 +56,7 @@ class Piece extends React.Component {
                  bottom:(7-this.props.row) * this.props.tileSize
                }}
       >
-        <img src={this.props.image} draggable="false" onClick={this.handleClick} className="image" alt="logo" />
+        <img src={this.props.image} draggable="false" onClick={this.handleClick} className={`image ${this.props.possibleTarget ? "possible-target-piece" : ""}`} alt="logo" />
       </Draggable>
     );
   }
