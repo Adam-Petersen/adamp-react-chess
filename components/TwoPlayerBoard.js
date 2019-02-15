@@ -158,6 +158,8 @@ class TwoPlayerBoard extends React.Component {
     );
   }
 
+
+
   getInitialPiecesArray() {
     var board = [];
 

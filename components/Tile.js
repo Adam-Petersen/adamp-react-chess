@@ -16,9 +16,12 @@ class Tile extends React.Component {
   render() {
     return (
       <div
-        className={`tile ${this.props.tileColor} ${this.props.highlighted === true ? 'highlighted' : ''} ${this.props.debug && this.props.debugTarget ? 'debug-target' : ''} ${this.props.possibleTarget ? 'possible-target' : ''}`}
+        className={`tile ${this.props.tileColor} ${this.props.debug && this.props.debugTarget ? 'debug-target' : ''}`}
         onClick={this.props.piece ? null : this.handleClick}
       >
+        {this.props.possibleTarget &&
+          <div className="dot"></div>
+        }
         {this.props.piece &&
           <Piece
             handleClick={this.handleClick}

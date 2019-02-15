@@ -2,6 +2,7 @@ import React from 'react';
 import TwoPlayerBoard from './TwoPlayerBoard';
 import GameModeSelect from './GameModeSelect';
 import PlayerName from './PlayerName'
+import Timer from './Timer';
 
 
 class Game extends React.Component {
@@ -51,16 +52,16 @@ class Game extends React.Component {
   render() {
     return (
       <div className="game">
-        <PlayerName
-          value={"Player 2"}
-          onChange={this.changePlayer2}
-          color="dark"
-          upNext={this.state.turn == "black"}
-        />
         {!this.state.mode &&
+          <div>
           <GameModeSelect
             onClick={this.onModeClick}
           />
+          <div className="bottom-text">
+              <span id="turn-indicator">New Game</span>
+              <span id="timer">00:00</span>
+          </div>
+          </div>
         }
         {this.state.mode == "two" &&
           <div className="two-board">
@@ -76,14 +77,13 @@ class Game extends React.Component {
               debug={this.state.debug}
               tileSize={this.tileSize}
             />
+
+            <div className="bottom-text">
+                <span id="turn-indicator">{this.state.turn}'s turn</span>
+                <Timer id="timer"/>
+            </div>
           </div>
         }
-        <PlayerName
-          value="Player 1"
-          onChange={this.changePlayer1}
-          color="light"
-          upNext={this.state.turn == "white"}
-        />
       </div>
     );
   }
