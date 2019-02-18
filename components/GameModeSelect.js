@@ -24,19 +24,18 @@ class GameModeSelect extends React.Component {
   render() {
     return (
       <div>
-
         <div className="board transparent">
           <div className="mode-select">
             <p className="mode-header"> Select Game Mode </p>
             <ModeButton
               text={"Local 1v1"}
-              disabled={false}
+              disabled={true}
               onClick={this.onLocalClick}
             />
 
             <ModeButton
               text={"AI mode"}
-              disabled={true}
+              disabled={false}
               onClick={this.onAIClick}
             />
 

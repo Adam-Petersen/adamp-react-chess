@@ -1,5 +1,6 @@
 import React from 'react';
 import TwoPlayerBoard from './TwoPlayerBoard';
+import OnePlayerBoard from './OnePlayerBoard';
 import GameModeSelect from './GameModeSelect';
 import PlayerName from './PlayerName'
 import Timer from './Timer';
@@ -83,6 +84,26 @@ class Game extends React.Component {
                 <Timer id="timer"/>
             </div>
           </div>
+        }
+        {this.state.mode == "one" &&
+        <div className="one-board">
+          {this.state.checkMate &&
+            <p className="checkmate-text">
+              Checkmate, {this.state.turn === 'white' ? 'black' : 'white'} wins!
+            </p>
+          }
+          <OnePlayerBoard
+            changeTurn={this.changeTurn}
+            checkMate={this.state.checkMate}
+            debug={this.state.debug}
+            tileSize={this.tileSize}
+          />
+
+          <div className="bottom-text">
+              <span id="turn-indicator">{this.state.turn}'s turn</span>
+              <Timer id="timer"/>
+          </div>
+        </div>
         }
       </div>
     );
