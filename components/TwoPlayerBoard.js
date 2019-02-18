@@ -8,7 +8,7 @@ class TwoPlayerBoard extends React.Component {
     super(props);
 
     var startBoard = this.initializeBoard();
-    this.moves = rules.setNewBoard(startBoard, this.props.turn);
+    this.moves = rules.getMoves(startBoard, this.props.turn);
     this.debugSetHighlights(startBoard);
 
     this.state = {
@@ -24,22 +24,27 @@ class TwoPlayerBoard extends React.Component {
   }
 
   handleDrag(startRow, startCol, finRow, finCol) {
+    if (this.state.checkMate) {
+      return;
+    }
+
     var startTile = this.state.board[startRow][startCol];
     var finTile = this.state.board[finRow][finCol];
     var newState = {};
+    var move;
 
-    if (rules.isValidMove(startTile, finTile)) {
+    if (move = rules.findMove(this.moves, startTile, finTile)) {
       var newBoard = this.copyBoard(this.state.board);
       newBoard[startRow][startCol] = {...startTile, piece: null};
       newBoard[finRow][finCol] = {...finTile, piece: startTile.piece }
-      this.moves = rules.setNewBoard(newBoard);
+      this.moves = rules.getMoves(newBoard, this.nextTurn(this.props.turn));
       newState.board = newBoard;
 
-      if (rules.isCheckMate()) {
+      if (this.moves.length === 0) {
         newState.checkMate = true;
         this.props.changeTurn({checkMate: true});
       }
-      else if (rules.isCheck()) {
+      else if (move.setsCheck) {
         this.props.changeTurn({check: true});
       }
       else {
@@ -55,7 +60,7 @@ class TwoPlayerBoard extends React.Component {
 
     this.debugSetHighlights(newState.board, newState.highlightedTile);
     this.setTargetHighlights(newState.board, newState.highlightedTile);
-    
+
     this.setState({
       ...this.state,
       ...newState,
@@ -68,9 +73,11 @@ class TwoPlayerBoard extends React.Component {
       return;
     }
 
+    var move;
     var newState = { board: this.state.board };
     var highlightedTile = this.state.highlightedTile;
     let clickedTile = this.state.board[row][col];
+
 
     if (highlightedTile) {
       if(highlightedTile.id === clickedTile.id) {
@@ -79,18 +86,18 @@ class TwoPlayerBoard extends React.Component {
       else if(clickedTile.piece && clickedTile.piece.color === highlightedTile.piece.color) {
         newState.highlightedTile = clickedTile;
       }
-      else if(rules.isValidMove(highlightedTile, clickedTile)) {
+      else if(move = rules.findMove(this.moves, highlightedTile, clickedTile)) {
         var newBoard = this.copyBoard(this.state.board);
         newBoard[highlightedTile.row][highlightedTile.col] = {...highlightedTile, piece: null};
         newBoard[row][col] = {...clickedTile, piece: highlightedTile.piece }
-        this.moves = rules.setNewBoard(newBoard);
+        this.moves = rules.getMoves(newBoard, this.nextTurn(this.props.turn));
         newState.board = newBoard;
 
-        if (rules.isCheckMate()) {
+        if (this.moves.length === 0) {
           newState.checkMate = true;
           this.props.changeTurn({checkMate: true});
         }
-        else if (rules.isCheck()) {
+        else if (move.setsCheck) {
           this.props.changeTurn({check: true});
         }
         else {
@@ -234,6 +241,10 @@ class TwoPlayerBoard extends React.Component {
     }
 
     return newBoard;
+  }
+
+  nextTurn(turn) {
+    return turn === 'white' ? 'black' : 'white';
   }
 
   debugSetHighlights(board, highlightedTile) {

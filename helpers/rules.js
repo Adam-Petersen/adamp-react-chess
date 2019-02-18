@@ -1,54 +1,24 @@
 var Rules = (function(){
-  var board, currentValidMoves, turn, isFutureMove, check, checkMate;
+  var board, turn;
 
-  var setNewBoard = function (newBoard) {
-    turn = turn === 'white' ? 'black' : 'white';
+  var getMoves = function(newBoard, newTurn) {
     board = newBoard;
-    currentValidMoves = generateValidMoves();
-    setCheckMate();
-    return currentValidMoves;
+    turn = newTurn;
+
+    return generateValidMoves();
   }
 
-  var isValidMove = function (startTile, targetTile) {
-    var valid = false;
-
-    currentValidMoves.forEach(move => {
-      if (startTile.id === move.startTile.id && targetTile.id === move.targetTile.id) {
-        valid = true;
-        setCheck(move);
+  var findMove = function(moves, startTile, targetTile) {
+    var foundMove = null;
+    moves.forEach(function(move) {
+      if (move.startTile.id === startTile.id && move.targetTile.id === targetTile.id) {
+        foundMove = move;
       }
     });
-
-    return valid;
-  };
-
-  var isCheck = function () {
-    return check;
+    return foundMove;
   }
 
-  function setCheck(move) {
-    check = false;
-    var futureMoves = generateFutureMoves(move.startTile, move.targetTile);
-
-    futureMoves.forEach(futureMove => {
-      if (futureMove.targetTile.piece &&
-        futureMove.targetTile.piece.name === 'king'&&
-        futureMove.targetTile.piece.color !== turn) {
-          check = true;
-    }
-    });
-
-  }
-
-  var isCheckMate = function (board, validMoves) {
-    return checkMate;
-  };
-
-  function setCheckMate() {
-    checkMate = currentValidMoves.length === 0;
-  }
-
-  function generateValidMoves() {
+  function generateValidMoves(isFutureMove) {
     var moves = generateValidBishopMoves().concat(
            generateValidKingMoves()).concat(
            generateValidKnightMoves()).concat(
@@ -57,31 +27,34 @@ var Rules = (function(){
            generateValidRookMoves());
 
     if (!isFutureMove) {
+      moves.forEach(move => move.futureMoves = generateFutureMoves(move));
       moves = moves.filter(move => !playerPutsSelfInCheck(move));
+      moves.forEach(move => move.setsCheck = setsCheck(move));
     }
     return moves;
   }
 
-  function generateFutureMoves(startTile, targetTile) {
+  function generateFutureMoves(move) {
     //Set varaibles to generate future moves
-    board[startTile.row][startTile.col] = {...startTile, piece: null};
-    board[targetTile.row][targetTile.col] = {...targetTile, piece: startTile.piece};
-    isFutureMove = true;
-    var futureMoves = generateValidMoves();
+    board[move.startTile.row][move.startTile.col] = {...move.startTile, piece: null};
+    board[move.targetTile.row][move.targetTile.col] = {...move.targetTile, piece: move.startTile.piece};
+    var oldTurn = turn;
+    turn = 'both';
+
+    var futureMoves = generateValidMoves(true);
 
     //Reset variables to what they were
-    board[startTile.row][startTile.col] = startTile;
-    board[targetTile.row][targetTile.col] = targetTile;
-    isFutureMove = false;
+    board[move.startTile.row][move.startTile.col] = move.startTile;
+    board[move.targetTile.row][move.targetTile.col] = move.targetTile;
+    turn = oldTurn;
 
     return futureMoves;
   }
 
   function playerPutsSelfInCheck(move) {
-    var futureMoves = generateFutureMoves(move.startTile, move.targetTile);
     var putsSelfInCheck = false;
 
-    futureMoves.forEach(futureMove => {
+    move.futureMoves.forEach(futureMove => {
       if (futureMove.targetTile.piece &&
           futureMove.targetTile.piece.name === 'king'&&
           futureMove.targetTile.piece.color === turn) {
@@ -90,6 +63,19 @@ var Rules = (function(){
     });
 
     return putsSelfInCheck;
+  }
+
+  function setsCheck(move) {
+    var check = false;
+
+    move.futureMoves.forEach(futureMove => {
+      if (futureMove.targetTile.piece &&
+        futureMove.targetTile.piece.name === 'king'&&
+        futureMove.targetTile.piece.color !== turn) {
+          check = true;
+      }
+    });
+    return check;
   }
 
   // PIECE RULES
@@ -128,7 +114,7 @@ var Rules = (function(){
 
     board.forEach(function(row){
       row.forEach(function(tile){
-        if (tile.piece && tile.piece.name === pieceType && (isFutureMove || tile.piece.color === turn)) {
+        if (tile.piece && tile.piece.name === pieceType && (tile.piece.color === turn || turn === 'both')) {
           livingPieces.push(tile);
         }
       });
@@ -279,10 +265,8 @@ var Rules = (function(){
   }
 
   return {
-    setNewBoard: setNewBoard,
-    isValidMove: isValidMove,
-    isCheck: isCheck,
-    isCheckMate: isCheckMate,
+    getMoves: getMoves,
+    findMove: findMove,
   };
 })();
 
