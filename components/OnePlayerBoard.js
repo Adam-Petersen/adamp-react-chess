@@ -10,6 +10,10 @@ class OnePlayerBoard extends React.Component {
 
     var startBoard = this.initializeBoard();
     this.moves = rules.getMoves(startBoard, 'white');
+
+    var startTime = (new Date).getTime();
+    AI.init(startBoard, this.moves);
+    console.log("Took " + ((new Date).getTime() - startTime)/1000 + " seconds");
     this.debugSetHighlights(startBoard);
 
     this.state = {
@@ -17,11 +21,18 @@ class OnePlayerBoard extends React.Component {
       highlightedTile: null,
       reset: null,
       checkMate: false,
+      aiMove: null,
     };
 
     this.handleClick = this.handleClick.bind(this);
     this.handleDrag = this.handleDrag.bind(this);
     this.highlightTargets = this.highlightTargets.bind(this);
+  }
+
+  componentDidUpdate() {
+    if (this.state.aiMove) {
+      setTimeout(() => this.moveAI(this.state.aiMove), 500);
+    }
   }
 
   handleDrag(startRow, startCol, finRow, finCol) {
@@ -39,6 +50,7 @@ class OnePlayerBoard extends React.Component {
       newBoard[startRow][startCol] = {...startTile, piece: null};
       newBoard[finRow][finCol] = {...finTile, piece: startTile.piece }
       newState.board = newBoard;
+      newState.aiMove = move;
 
       //if (this.moves.length === 0) {
       //  newState.checkMate = true;
@@ -64,7 +76,7 @@ class OnePlayerBoard extends React.Component {
     this.setState({
       ...this.state,
       ...newState,
-    }, move ? (() => this.moveAI()) : undefined);
+    });
   }
 
   handleClick(row, col) {
@@ -90,6 +102,7 @@ class OnePlayerBoard extends React.Component {
         newBoard[highlightedTile.row][highlightedTile.col] = {...highlightedTile, piece: null};
         newBoard[row][col] = {...clickedTile, piece: highlightedTile.piece }
         newState.board = newBoard;
+        newState.aiMove = move;
 
         /*if (this.moves.length === 0) {
           newState.checkMate = true;
@@ -117,7 +130,7 @@ class OnePlayerBoard extends React.Component {
     this.setState({
       ...this.state,
       ...newState,
-    }, move ? (() => this.moveAI()) : undefined);
+    });
   }
 
   highlightTargets(row, col) {
@@ -130,8 +143,14 @@ class OnePlayerBoard extends React.Component {
     });
   }
 
-  moveAI() {
-    var aiMove = AI.getMove(this.state.board);
+  moveAI(move) {
+    var startTime = (new Date).getTime();
+
+    AI.setPlayerMove(move);
+    var aiMove = AI.getAIMove();
+
+    console.log("Took " + ((new Date).getTime() - startTime)/1000 + " seconds");
+
 
     if (!aiMove) {
       this.props.changeTurn({checkMate: true});
@@ -140,20 +159,24 @@ class OnePlayerBoard extends React.Component {
         checkMate: true,
       });
     } else {
+      console.log(aiMove);
       var newBoard = this.copyBoard(this.state.board);
       newBoard[aiMove.startTile.row][aiMove.startTile.col] = {...aiMove.startTile, piece: null};
       newBoard[aiMove.targetTile.row][aiMove.targetTile.col] = {...aiMove.targetTile, piece: aiMove.startTile.piece }
       this.moves = rules.getMoves(newBoard, 'white');
 
+
       this.setState({
         ...this.state,
         board: newBoard,
         highlightedTile: null,
+        aiMove: null,
       });
     }
   }
 
   render() {
+    console.log('rendering');
     return (
       <table className={`board ${this.props.checkMate ? 'checkmate' : ''}`}>
         <tbody className="board-body">

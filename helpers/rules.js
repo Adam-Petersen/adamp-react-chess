@@ -30,6 +30,7 @@ var Rules = (function(){
       moves.forEach(move => move.futureMoves = generateFutureMoves(move));
       moves = moves.filter(move => !playerPutsSelfInCheck(move));
       moves.forEach(move => move.setsCheck = setsCheck(move));
+      moves = moves.map(move => ({...move, futureMoves: null}))
     }
     return moves;
   }

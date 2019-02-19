@@ -14,6 +14,9 @@ class Tile extends React.Component {
 
 
   render() {
+    if (this.props.row == 5 && this.props.col == 0) {
+      console.log('piece: ' + (this.props.piece ? 'true': 'false'));
+    }
     return (
       <div
         className={`tile ${this.props.tileColor} ${this.props.debug && this.props.debugTarget ? 'debug-target' : ''}`}
