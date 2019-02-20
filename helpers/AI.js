@@ -2,103 +2,95 @@ import rules from './rules';
 
 var AI = (function() {
   var maxDepth = 3;
+  var timesCalled = 0;
+  var leaves = 0;
+  var nodes = 0;
 
-  var curState = {
-    move: null,
-    board: null,
-    subStates: [],
-    turn: 'white',
-    optimalSubState: null,
-    depth: 0,
-    value: null,
+
+  var getAIMove = function(board){
+    timesCalled = 0;
+    board.moves = [];
+    let ret = minimax(board, 0, true, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
+    console.log("times called: " + timesCalled);
+    console.log(ret);
+    return ret.move;
   }
 
-  var init = function(board, moves) {
-    curState.board = copyBoard(board)
-    moves.forEach(move => curState.subStates.push(initializeSubStates(1, move, board, 'white')));
-    //console.log("substates set");
-    setOptimalSubStates(curState);
-    //console.log("initialized state: ");
-    //console.log(curState);
-  };
-
-  var getAIMove = function(){
-    var bestMove = curState.optimalSubState.move;
-
-    curState = getNewState(curState, bestMove);
-    updateSubStates(curState);
-    setOptimalSubStates(curState);
-
-    return bestMove;
-  }
-
-  var setPlayerMove = function(move){
-    curState = getNewState(curState, move);
-
-    updateSubStates(curState);
-    setOptimalSubStates(curState);
-    //console.log("done moving player");
-    //console.log(curState);
-  }
-
-  function initializeSubStates(depth, move, board, turn) {
-    if (depth > maxDepth) {
-      return;
+  function minimax(board, depth, isMaximizer, alpha, beta) {
+    timesCalled++;
+    let moves = rules.getMoves(board, isMaximizer ? 'black' : 'white');
+    if (moves.length == 0) {
+      let val = isMaximizer ? -10000 : 10000;
+      return {move: null, val: 10000};
+    } else if (depth == maxDepth) {
+      leaves++;
+      return { move: null, val: value(board) };
     }
 
-    var newBoard = copyBoard(board);
-    newBoard[move.startTile.row][move.startTile.col] = {...move.startTile, piece: null};
-    newBoard[move.targetTile.row][move.targetTile.col] = {...move.targetTile, piece: move.startTile.piece}
-    var newTurn = oppositeTurn(turn);
-    var newState = {
-      move: move,
-      board: newBoard,
-      turn: newTurn,
-      subStates: [],
-      depth: depth,
-      value: value(newBoard),
-      optimalSubState: null,
-    }
 
-    if (depth == maxDepth) {
-      return newState;
-    } else {
-      var newMoves = rules.getMoves(newBoard, newTurn);
-      newMoves.forEach(newMove => newState.subStates.push(initializeSubStates(depth+1, newMove, newBoard, newTurn)));
-      return newState;
-    }
-  }
+    nodes++;
 
-  function updateSubStates(state) {
-    state.depth--;
-    if (state.subStates.length == 0) {
-      let moves = rules.getMoves(state.board, state.turn);
-      moves.forEach(move => state.subStates.push(initializeSubStates(state.depth + 1, move, state.board, state.turn)));
-    } else {
-      state.subStates.forEach(subState => updateSubStates(subState));
-    }
-  }
+    if (isMaximizer) {
+      let bestMove = {
+        move: null,
+        val: Number.NEGATIVE_INFINITY
+      };
 
-  function setOptimalSubStates(state) {
-    if(state.subStates.length == 0) {
-      return;
-    }
+      for(let i = 0; i < moves.length; i++) {
+        let move = moves[i];
+        let newBoard = copyBoard(board);
+        newBoard[move.startTile.row][move.startTile.col] = {...move.startTile, piece: null};
+        newBoard[move.targetTile.row][move.targetTile.col] = {...move.targetTile, piece: move.startTile.piece};
+        newBoard.moves.push(move);
 
-    state.subStates.forEach(subState => setOptimalSubStates(subState));
+        let newMove = minimax(newBoard, depth+1, !isMaximizer, alpha, beta);
 
-    var findMax = state.turn == 'black';
-    var bestState = state.subStates[0];
-    for(let i = 1; i < state.subStates.length; i++) {
-      if ((findMax && state.subStates[i].value > bestState.value) ||
-          (!findMax && state.subStates[i].value < bestState.value)) {
-        bestState = state.subStates[i];
-      } else if ((findMax && state.subStates[i].value == bestState.value) ||
-          (!findMax && state.subStates[i].value == bestState.value)) {
-        bestState = Math.random() < 0.5 ? bestState : state.subStates[i];
+        if (newMove.val > bestMove.val || (newMove.val === bestMove.val && Math.random() < 0.5)) {
+          bestMove = {
+            move: move,
+            val: newMove.val,
+          }
+        }
+
+        alpha = Math.max(alpha, bestMove.val);
+        if (beta <= alpha) {
+          //console.log('breaking');
+          break;
+        }
       }
-    }
 
-    state.optimalSubState = bestState;
+      return bestMove;
+
+    } else {
+      let bestMove = {
+        move: null,
+        val: Number.POSITIVE_INFINITY
+      };
+
+      for(let i = 0; i < moves.length; i++) {
+        let move = moves[i];
+        let newBoard = copyBoard(board);
+        newBoard[move.startTile.row][move.startTile.col] = {...move.startTile, piece: null};
+        newBoard[move.targetTile.row][move.targetTile.col] = {...move.targetTile, piece: move.startTile.piece};
+        newBoard.moves.push(move);
+
+        let newMove = minimax(newBoard, depth+1, !isMaximizer, alpha, beta);
+        if (newMove.val < bestMove.val || (newMove.val === bestMove.val && Math.random() < 0.5)) {
+          //console.log("setting best move in minimizer");
+          bestMove = {
+            move: move,
+            val: newMove.val,
+          }
+        }
+        beta = Math.min(beta, bestMove.val);
+
+        if (beta <= alpha) {
+          //console.log('breaking');
+          //break;
+        }
+      }
+      return bestMove;
+    }
   }
 
   function value(board) {
@@ -118,7 +110,7 @@ var AI = (function() {
           } else if (name == 'rook') {
             pieceVal = 5;
           } else if (name == 'queen') {
-            pieceVal = 5;
+            pieceVal = 9;
           } else if (name == 'king') {
             pieceVal = 100;
           } else {
@@ -153,36 +145,17 @@ var AI = (function() {
       }
     }
 
+    newBoard.moves = [];
+    for(let i = 0; i < oldBoard.moves.length; i++) {
+      newBoard.moves.push(oldBoard.moves[i])
+    }
+
     return newBoard;
   }
 
-  function getNewState(state, move) {
-    //console.log("getNewState")
-    var newState;
-    for(let i = 0; i < state.subStates.length; i++) {
-      let subState = state.subStates[i];
-      if (move.startTile.id == subState.move.startTile.id && move.targetTile.id == subState.move.targetTile.id) {
-        newState = subState;
-        break;
-      }
-    }
-
-    if (!newState) {
-      console.log("error in movePlayer");
-      return null;
-    } else {
-      return newState;
-    }
-  }
-
-  function oppositeTurn(turn) {
-    return turn === 'white' ? 'black' : 'white';
-  }
 
   return {
-    init: init,
     getAIMove: getAIMove,
-    setPlayerMove: setPlayerMove,
   };
 })();
 

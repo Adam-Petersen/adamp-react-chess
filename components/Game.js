@@ -25,6 +25,7 @@ class Game extends React.Component {
     this.onModeClick = this.onModeClick.bind(this);
     this.changePlayer1 = this.changePlayer1.bind(this);
     this.changePlayer2 = this.changePlayer2.bind(this);
+    this.setCheckMate = this.setCheckMate.bind(this);
   }
 
   changePlayer1(name) {
@@ -37,6 +38,10 @@ class Game extends React.Component {
 
   changeTurn(vals) {
     this.setState({...this.state, ...vals, turn: this.state.turn === 'white' ? 'black' : 'white'});
+  }
+
+  setCheckMate() {
+    this.setState({...this.state, checkMate: true});
   }
 
   toggleDebug() {
@@ -93,7 +98,7 @@ class Game extends React.Component {
             </p>
           }
           <OnePlayerBoard
-            changeTurn={this.changeTurn}
+            setCheckMate={this.setCheckMate}
             checkMate={this.state.checkMate}
             debug={this.state.debug}
             tileSize={this.tileSize}

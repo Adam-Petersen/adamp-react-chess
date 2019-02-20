@@ -12,7 +12,6 @@ class OnePlayerBoard extends React.Component {
     this.moves = rules.getMoves(startBoard, 'white');
 
     var startTime = (new Date).getTime();
-    AI.init(startBoard, this.moves);
     console.log("Took " + ((new Date).getTime() - startTime)/1000 + " seconds");
     this.debugSetHighlights(startBoard);
 
@@ -31,7 +30,7 @@ class OnePlayerBoard extends React.Component {
 
   componentDidUpdate() {
     if (this.state.aiMove) {
-      setTimeout(() => this.moveAI(this.state.aiMove), 500);
+      setTimeout(() => this.moveAI(this.state.aiMove));
     }
   }
 
@@ -145,38 +144,50 @@ class OnePlayerBoard extends React.Component {
 
   moveAI(move) {
     var startTime = (new Date).getTime();
-
-    AI.setPlayerMove(move);
-    var aiMove = AI.getAIMove();
-
+    var aiMove = AI.getAIMove(this.state.board);
     console.log("Took " + ((new Date).getTime() - startTime)/1000 + " seconds");
 
-
     if (!aiMove) {
+      this.props.setCheckMate();
+      return;
+    }
+
+    var newBoard = this.copyBoard(this.state.board);
+    newBoard[aiMove.startTile.row][aiMove.startTile.col] = {...aiMove.startTile, piece: null};
+    newBoard[aiMove.targetTile.row][aiMove.targetTile.col] = {...aiMove.targetTile, piece: aiMove.startTile.piece }
+    this.moves = rules.getMoves(newBoard, 'white');
+
+    this.setState({
+      ...this.state,
+      board: newBoard,
+      highlightedTile: null,
+      aiMove: null,
+    });
+
+    if (this.moves.length == 0) {
+      this.props.setCheckMate();
+    }
+
+
+    /*if (!aiMove) {
       this.props.changeTurn({checkMate: true});
       this.setState({
         ...this.state,
         checkMate: true,
       });
     } else {
-      console.log(aiMove);
+      //console.log(aiMove);
       var newBoard = this.copyBoard(this.state.board);
       newBoard[aiMove.startTile.row][aiMove.startTile.col] = {...aiMove.startTile, piece: null};
       newBoard[aiMove.targetTile.row][aiMove.targetTile.col] = {...aiMove.targetTile, piece: aiMove.startTile.piece }
       this.moves = rules.getMoves(newBoard, 'white');
 
 
-      this.setState({
-        ...this.state,
-        board: newBoard,
-        highlightedTile: null,
-        aiMove: null,
-      });
-    }
+
+    }*/
   }
 
   render() {
-    console.log('rendering');
     return (
       <table className={`board ${this.props.checkMate ? 'checkmate' : ''}`}>
         <tbody className="board-body">
