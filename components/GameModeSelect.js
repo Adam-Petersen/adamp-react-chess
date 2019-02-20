@@ -29,7 +29,7 @@ class GameModeSelect extends React.Component {
             <p className="mode-header"> Select Game Mode </p>
             <ModeButton
               text={"Local 1v1"}
-              disabled={true}
+              disabled={false}
               onClick={this.onLocalClick}
             />
 

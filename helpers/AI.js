@@ -11,15 +11,14 @@ var AI = (function() {
     timesCalled = 0;
     board.moves = [];
     let ret = minimax(board, 0, true, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
-    console.log("times called: " + timesCalled);
-    console.log(ret);
+
     return ret.move;
   }
 
   function minimax(board, depth, isMaximizer, alpha, beta) {
     timesCalled++;
     let moves = rules.getMoves(board, isMaximizer ? 'black' : 'white');
-    if (moves.length == 0) {
+    if (moves.length === 0) {
       let val = isMaximizer ? -10000 : 10000;
       return {move: null, val: 10000};
     } else if (depth == maxDepth) {
@@ -45,7 +44,7 @@ var AI = (function() {
 
         let newMove = minimax(newBoard, depth+1, !isMaximizer, alpha, beta);
 
-        if (newMove.val > bestMove.val || (newMove.val === bestMove.val && Math.random() < 0.5)) {
+        if (newMove.val > bestMove.val || (newMove.val === bestMove.val && Math.random() > 0.5)) {
           bestMove = {
             move: move,
             val: newMove.val,
@@ -54,13 +53,11 @@ var AI = (function() {
 
         alpha = Math.max(alpha, bestMove.val);
         if (beta <= alpha) {
-          //console.log('breaking');
           break;
         }
       }
 
       return bestMove;
-
     } else {
       let bestMove = {
         move: null,
@@ -75,8 +72,7 @@ var AI = (function() {
         newBoard.moves.push(move);
 
         let newMove = minimax(newBoard, depth+1, !isMaximizer, alpha, beta);
-        if (newMove.val < bestMove.val || (newMove.val === bestMove.val && Math.random() < 0.5)) {
-          //console.log("setting best move in minimizer");
+        if (newMove.val < bestMove.val || (newMove.val === bestMove.val && Math.random() > 0.5)) {
           bestMove = {
             move: move,
             val: newMove.val,
@@ -85,8 +81,7 @@ var AI = (function() {
         beta = Math.min(beta, bestMove.val);
 
         if (beta <= alpha) {
-          //console.log('breaking');
-          //break;
+          break;
         }
       }
       return bestMove;

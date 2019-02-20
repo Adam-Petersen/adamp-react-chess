@@ -2,8 +2,6 @@ import React from 'react';
 import TwoPlayerBoard from './TwoPlayerBoard';
 import OnePlayerBoard from './OnePlayerBoard';
 import GameModeSelect from './GameModeSelect';
-import PlayerName from './PlayerName'
-import Timer from './Timer';
 
 
 class Game extends React.Component {
@@ -17,38 +15,23 @@ class Game extends React.Component {
       turn: null,
       check: false,
       checkMate: false,
-      debug: false,
     };
 
     this.changeTurn = this.changeTurn.bind(this);
-    this.toggleDebug = this.toggleDebug.bind(this);
     this.onModeClick = this.onModeClick.bind(this);
-    this.changePlayer1 = this.changePlayer1.bind(this);
-    this.changePlayer2 = this.changePlayer2.bind(this);
     this.setCheckMate = this.setCheckMate.bind(this);
   }
 
-  changePlayer1(name) {
-
+  changeTurn() {
+    this.setState({...this.state, turn: this.state.turn === 'white' ? 'black' : 'white'});
   }
 
-  changePlayer2(name) {
-
-  }
-
-  changeTurn(vals) {
-    this.setState({...this.state, ...vals, turn: this.state.turn === 'white' ? 'black' : 'white'});
-  }
-
-  setCheckMate() {
-    this.setState({...this.state, checkMate: true});
-  }
-
-  toggleDebug() {
-    this.setState({
-      ...this.state,
-      debug: !this.state.debug,
-    });
+  setCheckMate(winner) {
+    if (winner) {
+      this.setState({...this.state, turn: winner, checkMate: true})
+    } else {
+      this.setState({...this.state, checkMate: true});
+    }
   }
 
   onModeClick(mode) {
@@ -60,55 +43,30 @@ class Game extends React.Component {
       <div className="game">
         {!this.state.mode &&
           <div>
-          <GameModeSelect
-            onClick={this.onModeClick}
-          />
-          <div className="bottom-text">
+            <GameModeSelect
+              onClick={this.onModeClick}
+            />
+            <div className="bottom-text">
               <span id="turn-indicator">New Game</span>
               <span id="timer">00:00</span>
-          </div>
-          </div>
-        }
-        {this.state.mode == "two" &&
-          <div className="two-board">
-            {this.state.checkMate &&
-              <p className="checkmate-text">
-                Checkmate, {this.state.turn === 'white' ? 'black' : 'white'} wins!
-              </p>
-            }
-            <TwoPlayerBoard
-              changeTurn={this.changeTurn}
-              checkMate={this.state.checkMate}
-              turn={this.state.turn}
-              debug={this.state.debug}
-              tileSize={this.tileSize}
-            />
-
-            <div className="bottom-text">
-                <span id="turn-indicator">{this.state.turn}'s turn</span>
-                <Timer id="timer"/>
             </div>
           </div>
         }
-        {this.state.mode == "one" &&
-        <div className="one-board">
-          {this.state.checkMate &&
-            <p className="checkmate-text">
-              Checkmate, {this.state.turn === 'white' ? 'black' : 'white'} wins!
-            </p>
-          }
-          <OnePlayerBoard
+        {this.state.mode == "two" &&
+          <TwoPlayerBoard
+            changeTurn={this.changeTurn}
+            turn={this.state.turn}
+            tileSize={this.tileSize}
             setCheckMate={this.setCheckMate}
             checkMate={this.state.checkMate}
-            debug={this.state.debug}
-            tileSize={this.tileSize}
           />
-
-          <div className="bottom-text">
-              <span id="turn-indicator">{this.state.turn}'s turn</span>
-              <Timer id="timer"/>
-          </div>
-        </div>
+        }
+        {this.state.mode == "one" &&
+          <OnePlayerBoard
+            tileSize={this.tileSize}
+            setCheckMate={this.setCheckMate}
+            checkMate={this.state.checkMate}
+          />
         }
       </div>
     );
