@@ -31,7 +31,6 @@ var Rules = (function(){
       moves = moves.filter(move => !playerPutsSelfInCheck(move));
       moves.forEach(move => move.setsCheck = setsCheck(move));
       moves = moves.map(move => ({...move, futureMoves: null}))
-      moves = moves.filter(move => move.targetTile.piece).concat(moves.filter(move => !move.targetTile.piece));
     }
     return moves;
   }

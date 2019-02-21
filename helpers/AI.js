@@ -1,4 +1,5 @@
 import rules from './rules';
+import helper from './boardHelper';
 
 var AI = (function() {
   var maxDepth = 3;
@@ -9,7 +10,6 @@ var AI = (function() {
 
   var getAIMove = function(board){
     timesCalled = 0;
-    board.moves = [];
     let ret = minimax(board, 0, true, Number.NEGATIVE_INFINITY, Number.POSITIVE_INFINITY);
 
     return ret.move;
@@ -18,6 +18,8 @@ var AI = (function() {
   function minimax(board, depth, isMaximizer, alpha, beta) {
     timesCalled++;
     let moves = rules.getMoves(board, isMaximizer ? 'black' : 'white');
+    moves = shuffle(moves.filter(move => move.targetTile.piece)).concat(shuffle(moves.filter(move => !move.targetTile.piece)));
+
     if (moves.length === 0) {
       let val = isMaximizer ? -10000 : 10000;
       return {move: null, val: 10000};
@@ -37,10 +39,9 @@ var AI = (function() {
 
       for(let i = 0; i < moves.length; i++) {
         let move = moves[i];
-        let newBoard = copyBoard(board);
+        let newBoard = helper.copyBoard(board);
         newBoard[move.startTile.row][move.startTile.col] = {...move.startTile, piece: null};
         newBoard[move.targetTile.row][move.targetTile.col] = {...move.targetTile, piece: move.startTile.piece};
-        newBoard.moves.push(move);
 
         let newMove = minimax(newBoard, depth+1, !isMaximizer, alpha, beta);
 
@@ -66,10 +67,9 @@ var AI = (function() {
 
       for(let i = 0; i < moves.length; i++) {
         let move = moves[i];
-        let newBoard = copyBoard(board);
+        let newBoard = helper.copyBoard(board);
         newBoard[move.startTile.row][move.startTile.col] = {...move.startTile, piece: null};
         newBoard[move.targetTile.row][move.targetTile.col] = {...move.targetTile, piece: move.startTile.piece};
-        newBoard.moves.push(move);
 
         let newMove = minimax(newBoard, depth+1, !isMaximizer, alpha, beta);
         if (newMove.val < bestMove.val || (newMove.val === bestMove.val && Math.random() > 0.5)) {
@@ -124,30 +124,15 @@ var AI = (function() {
     return val;
   }
 
-  function copyBoard(oldBoard) {
-    var newBoard = [];
-
-    for(let i = 0; i < 8; i++) {
-      newBoard.push(new Array(8));
-    };
-
-    for(let i = 0; i < 8; i++) {
-      for(let j = 0; j < 8; j++) {
-        newBoard[i][j] = {...oldBoard[i][j]};
-        if (oldBoard[i][j].piece) {
-          newBoard[i][j].piece = {...oldBoard[i][j].piece};
-        }
+  function shuffle(arr) {
+      for (let i = arr.length - 1; i > 0; i--) {
+          let j = Math.floor(Math.random() * (i + 1));
+          let temp = arr[i];
+          arr[i] = arr[j];
+          arr[j] = temp;
       }
-    }
-
-    newBoard.moves = [];
-    for(let i = 0; i < oldBoard.moves.length; i++) {
-      newBoard.moves.push(oldBoard.moves[i])
-    }
-
-    return newBoard;
+      return arr;
   }
-
 
   return {
     getAIMove: getAIMove,
