@@ -1,6 +1,7 @@
 import React from 'react';
 import TwoPlayerBoard from './TwoPlayerBoard';
 import OnePlayerBoard from './OnePlayerBoard';
+import OnlineBoard from './OnlineBoard';
 import GameModeSelect from './GameModeSelect';
 
 
@@ -12,26 +13,9 @@ class Game extends React.Component {
 
     this.state = {
       mode: null,
-      turn: null,
-      check: false,
-      checkMate: false,
     };
 
-    this.changeTurn = this.changeTurn.bind(this);
     this.onModeClick = this.onModeClick.bind(this);
-    this.setCheckMate = this.setCheckMate.bind(this);
-  }
-
-  changeTurn() {
-    this.setState({...this.state, turn: this.state.turn === 'white' ? 'black' : 'white'});
-  }
-
-  setCheckMate(winner) {
-    if (winner) {
-      this.setState({...this.state, turn: winner, checkMate: true})
-    } else {
-      this.setState({...this.state, checkMate: true});
-    }
   }
 
   onModeClick(mode) {
@@ -54,18 +38,17 @@ class Game extends React.Component {
         }
         {this.state.mode == "two" &&
           <TwoPlayerBoard
-            changeTurn={this.changeTurn}
-            turn={this.state.turn}
             tileSize={this.tileSize}
-            setCheckMate={this.setCheckMate}
-            checkMate={this.state.checkMate}
           />
         }
         {this.state.mode == "one" &&
           <OnePlayerBoard
             tileSize={this.tileSize}
-            setCheckMate={this.setCheckMate}
-            checkMate={this.state.checkMate}
+          />
+        }
+        {this.state.mode == "online" &&
+          <OnlineBoard
+            tileSize={this.tileSize}
           />
         }
       </div>

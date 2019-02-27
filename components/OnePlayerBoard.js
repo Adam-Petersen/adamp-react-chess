@@ -19,6 +19,7 @@ class OnePlayerBoard extends React.Component {
       highlightedTile: null,
       reset: null,
       checkMate: false,
+      winner: null,
       moveAI: false,
     };
 
@@ -93,23 +94,23 @@ class OnePlayerBoard extends React.Component {
     var aiMove = AI.getAIMove(this.state.board);
 
     if (!aiMove) {
-      this.props.setCheckMate('white');
-      console.log('checkmate white');
-      return;
-    }
+      this.setState({
+        ...this.state,
+        checkMate: true,
+        winner: 'white',
+        moveAI: false,
+      });
+    } else {
+      var newBoard = helper.getNewBoard(this.state.board, aiMove.startTile, aiMove.targetTile);
+      this.moves = rules.getMoves(newBoard, 'white');
 
-    var newBoard = helper.getNewBoard(this.state.board, aiMove.startTile, aiMove.targetTile);
-    this.moves = rules.getMoves(newBoard, 'white');
-
-    this.setState({
-      ...this.state,
-      board: newBoard,
-      moveAI: false,
-    });
-
-    if (this.moves.length == 0) {
-      this.props.setCheckMate('black');
-      console.log('checkmate black');
+      this.setState({
+        ...this.state,
+        board: newBoard,
+        moveAI: false,
+        checkMate: this.moves.length === 0,
+        winner: this.moves.length === 0 ? 'black' : null,
+      });
     }
   }
 
@@ -126,13 +127,13 @@ class OnePlayerBoard extends React.Component {
   render() {
     return (
       <div className="one-board">
-        {this.props.checkMate &&
+        {this.state.checkMate &&
           <p className="checkmate-text">
-            Checkmate, {this.props.turn} wins!
+            Checkmate, {this.state.winner} wins!
           </p>
         }
         <Board
-          checkMate={this.props.checkMate}
+          checkMate={this.state.checkMate}
           board={this.state.board}
           handleClick={this.handleClick}
           handleDrag={this.handleDrag}

@@ -9,10 +9,11 @@ class TwoPlayerBoard extends React.Component {
     super(props);
 
     var startBoard = helper.initializeBoard();
-    this.moves = rules.getMoves(startBoard, this.props.turn);
+    this.moves = rules.getMoves(startBoard, 'white');
 
     this.state = {
       board: startBoard,
+      turn: 'white',
       highlightedTile: null,
       reset: null,
       checkMate: false,
@@ -33,11 +34,11 @@ class TwoPlayerBoard extends React.Component {
     var newState = {board: this.state.board};
 
     if (helper.movePiece(this.state.board, this.moves, startTile, targetTile, newState)) {
-      this.moves = rules.getMoves(newState.board, helper.nextTurn(this.props.turn));
+      this.moves = rules.getMoves(newState.board, helper.nextTurn(this.state.turn));
       if (this.moves.length == 0) {
-        this.props.setCheckMate();
+        newState.checkMate = true;
       } else {
-        this.props.changeTurn();
+        newState.turn = helper.nextTurn(this.state.turn);
       }
     } else {
       newState.reset = startTile;
@@ -68,15 +69,15 @@ class TwoPlayerBoard extends React.Component {
       else if(clickedTile.piece && clickedTile.piece.color === highlightedTile.piece.color) {
         newState.highlightedTile = clickedTile;
       } else if (helper.movePiece(this.state.board, this.moves, highlightedTile, clickedTile, newState)) {
-        this.moves = rules.getMoves(newState.board, helper.nextTurn(this.props.turn));
+        this.moves = rules.getMoves(newState.board, helper.nextTurn(this.state.turn));
         if (this.moves.length === 0) {
-          this.props.setCheckMate();
+          newState.checkMate = true;
         } else {
-          this.props.changeTurn();
+          newState.turn = helper.nextTurn(this.state.turn);
         }
       }
     }
-    else if (clickedTile.piece && clickedTile.piece.color === this.props.turn) {
+    else if (clickedTile.piece && clickedTile.piece.color === this.state.turn) {
       newState.highlightedTile = clickedTile;
     }
 
@@ -98,16 +99,24 @@ class TwoPlayerBoard extends React.Component {
     });
   }
 
+  setCheckMate() {
+
+  }
+
+  changeTurn() {
+
+  }
+
   render() {
     return (
       <div className="two-board">
-        {this.props.checkMate &&
+        {this.state.checkMate &&
           <p className="checkmate-text">
-            Checkmate, {this.props.turn} wins!
+            Checkmate, {this.state.turn} wins!
           </p>
         }
         <Board
-          checkMate={this.props.checkMate}
+          checkMate={this.state.checkMate}
           board={this.state.board}
           handleClick={this.handleClick}
           handleDrag={this.handleDrag}
@@ -115,10 +124,10 @@ class TwoPlayerBoard extends React.Component {
           highlightedTile={this.state.highlightedTile}
           reset={this.state.reset}
           tileSize={this.props.tileSize}
-          turn={this.props.turn}
+          turn={this.state.turn}
         />
         <div className="bottom-text">
-            <span id="turn-indicator">{this.props.turn}'s turn</span>
+            <span id="turn-indicator">{this.state.turn}'s turn</span>
             <Timer id="timer"/>
         </div>
       </div>

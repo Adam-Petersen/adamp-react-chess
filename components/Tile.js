@@ -32,8 +32,8 @@ class Tile extends React.Component {
             col={this.props.col}
             reset={this.props.reset}
             tileSize={this.props.tileSize}
-            disableDrag={this.props.piece && this.props.piece.color !== this.props.turn}
             possibleTarget={this.props.possibleTarget}
+            disableDrag={this.props.disableDrag || (this.props.piece && (this.props.piece.color !== this.props.turn || this.props.checkMate || this.props.searching))}
           />
         }
       </div>

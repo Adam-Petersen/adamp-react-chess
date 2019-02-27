@@ -10,16 +10,21 @@ class OnlineBoard extends React.Component {
     super(props);
 
     var startBoard = helper.initializeBoard();
-    this.moves = rules.getMoves(startBoard, this.props.turn);
+    this.moves = [];
 
     this.state = {
       board: startBoard,
+      turn: 'white',
       highlightedTile: null,
       reset: null,
       checkMate: false,
+      winner: null,
       searching: true,
     };
 
+    this.handlePlayerFound = this.handlePlayerFound.bind(this);
+    this.handleOpponentMove = this.handleOpponentMove.bind(this);
+    this.handleOpponentCheckmate = this.handleOpponentCheckmate.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.handleDrag = this.handleDrag.bind(this);
     this.highlightTargets = this.highlightTargets.bind(this);
@@ -29,7 +34,11 @@ class OnlineBoard extends React.Component {
     api.init(this.handlePlayerFound, this.handleOpponentMove, this.handleOpponentCheckmate);
   }
 
-  handlePlayerFound() {
+  handlePlayerFound(color) {
+    if(color === 'white') {
+      this.moves = rules.getMoves(this.state.board, 'white');
+    }
+
     this.setState({
       ...this.state,
       searching: false,
@@ -38,27 +47,36 @@ class OnlineBoard extends React.Component {
   }
 
   handleOpponentMove(newBoard) {
-    let checkMate = false;
     this.moves = rules.getMoves(newBoard, this.state.color);
 
     if (this.moves.length === 0) {
+      console.log('sending checkmate')
       api.checkmate();
-      checkMate = true;
+      helper.setTargetHighlights(newBoard, this.moves, null);
+      this.setState({
+        ...this.state,
+        board: newBoard,
+        checkMate: true,
+        winner: this.state.turn,
+        highlightedTile: null,
+      });
     } else {
-      this.props.changeTurn();
+      helper.setTargetHighlights(newBoard, this.moves, null);
+      this.setState({
+        ...this.state,
+        board: newBoard,
+        turn: this.state.color,
+        highlightedTile: null,
+      });
     }
-
-    this.setState({
-      ...this.state,
-      board: newBoard,
-      checkmate: checkMate,
-    });
   }
 
   handleOpponentCheckmate() {
+    console.log('handle checkmate')
     this.setState({
       ...this.state,
       checkMate: true,
+      winner: this.state.color,
     });
   }
 
@@ -73,7 +91,7 @@ class OnlineBoard extends React.Component {
 
     if (helper.movePiece(this.state.board, this.moves, startTile, targetTile, newState)) {
       api.update(newState.board);
-      this.props.changeTurn();
+      newState.turn = helper.nextTurn(this.state.turn);
     } else {
       newState.reset = startTile;
       newState.highlightedTile = startTile;
@@ -104,10 +122,10 @@ class OnlineBoard extends React.Component {
         newState.highlightedTile = clickedTile;
       } else if (helper.movePiece(this.state.board, this.moves, highlightedTile, clickedTile, newState)) {
         api.update(newState.board);
-        this.props.changeTurn();
+        newState.turn = helper.nextTurn(this.state.turn);
       }
     }
-    else if (clickedTile.piece && clickedTile.piece.color === this.state.color && this.props.turn === this.state.color) {
+    else if (clickedTile.piece && clickedTile.piece.color === this.state.color && this.state.turn === this.state.color) {
       newState.highlightedTile = clickedTile;
     }
 
@@ -137,13 +155,13 @@ class OnlineBoard extends React.Component {
             Searching...
           </p>
         }
-        {this.props.checkMate &&
+        {this.state.checkMate &&
           <p className="checkmate-text">
-            Checkmate, {this.props.turn} wins!
+            Checkmate, {this.state.winner} wins!
           </p>
         }
         <Board
-          checkMate={this.props.checkMate}
+          checkMate={this.state.checkMate}
           board={this.state.board}
           handleClick={this.handleClick}
           handleDrag={this.handleDrag}
@@ -151,16 +169,17 @@ class OnlineBoard extends React.Component {
           highlightedTile={this.state.highlightedTile}
           reset={this.state.reset}
           tileSize={this.props.tileSize}
-          turn={this.state.color}
+          turn={this.state.turn}
+          disableDrag={this.state.turn !== this.state.color}
         />
         <div className="bottom-text">
-            <span id="turn-indicator">{this.props.turn}'s turn</span>
+            <span id="turn-indicator">{this.state.turn}'s turn</span>
+            <span>   You are {this.state.color}</span>
             <Timer id="timer"/>
         </div>
       </div>
     );
   }
-
 }
 
 export default OnlineBoard;

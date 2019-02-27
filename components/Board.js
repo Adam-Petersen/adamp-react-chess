@@ -25,6 +25,9 @@ class Board extends React.Component {
                     reset = { this.props.reset && this.props.reset.id == this.props.board[i][j].id }
                     tileSize = {this.props.tileSize}
                     turn = {this.props.turn}
+                    checkMate = {this.props.checkMate}
+                    searching = {this.props.searching}
+                    disableDrag={this.props.disableDrag}
                   />
                 </td>
               )}

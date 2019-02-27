@@ -1,10 +1,12 @@
 import openSocket from 'socket.io-client';
-const  socket = openSocket('http://localhost:9876');
-var opp_id;
+
+var opp_id, socket;
 
 var api = function() {
 
   function init(onFoundPlayerCallback, onUpdateCallback, onCheckMateCallback) {
+    socket = openSocket('http://adam-petersen.com:9876/');
+
     // Set up callbacks before starting search
     socket.on('found player', data => {
       opp_id = data.opp_id;
@@ -26,10 +28,10 @@ var api = function() {
   }
 
   return {
-    search: search,
+    init: init,
     update: update,
     checkmate: checkmate,
   }
 }();
 
-export { subscribeToTimer };
+export default api;

@@ -41,7 +41,7 @@ class GameModeSelect extends React.Component {
 
             <ModeButton
               text={"Online Mode"}
-              disabled={true}
+              disabled={false}
               onClick={this.onOnlineClick}
             />
           </div>

@@ -21,6 +21,7 @@ setInterval(() => {
 }, 2000);
 
 io.on('connection', socket => {
+  console.log(socket.id + ' connected');
   socket.on('searching', () => {
     queue.push(socket.id);
   });
@@ -31,7 +32,7 @@ io.on('connection', socket => {
 
   socket.on('checkmate', opp_id => {
     io.to(opp_id).emit('checkmate');
-  }
+  });
 });
 
 const port = 9876;
