@@ -4,7 +4,7 @@ var opp_id, socket;
 
 var api = function() {
 
-  function init(onFoundPlayerCallback, onUpdateCallback, onCheckMateCallback) {
+  function init(onFoundPlayerCallback, onUpdateCallback, onCheckMateCallback, onOpponentDisconnectCallback) {
     socket = openSocket('http://adam-petersen.com:9876/');
 
     // Set up callbacks before starting search
@@ -14,6 +14,7 @@ var api = function() {
     });
     socket.on('update', board => onUpdateCallback(board));
     socket.on('checkmate', () => onCheckMateCallback());
+    socket.on('opponent disconnected', () => onOpponentDisconnectCallback());
 
     // start search
     socket.emit('searching');

@@ -25,18 +25,22 @@ class OnlineBoard extends React.Component {
     this.handlePlayerFound = this.handlePlayerFound.bind(this);
     this.handleOpponentMove = this.handleOpponentMove.bind(this);
     this.handleOpponentCheckmate = this.handleOpponentCheckmate.bind(this);
+    this.handleOpponentDisconnect = this.handleOpponentDisconnect.bind(this);
     this.handleClick = this.handleClick.bind(this);
     this.handleDrag = this.handleDrag.bind(this);
     this.highlightTargets = this.highlightTargets.bind(this);
   }
 
   componentDidMount() {
-    api.init(this.handlePlayerFound, this.handleOpponentMove, this.handleOpponentCheckmate);
+    api.init(this.handlePlayerFound, this.handleOpponentMove,
+             this.handleOpponentCheckmate, this.handleOpponentDisconnect);
   }
 
   handlePlayerFound(color) {
     if(color === 'white') {
       this.moves = rules.getMoves(this.state.board, 'white');
+    } else {
+      //this.flipBoard();
     }
 
     this.setState({
@@ -78,6 +82,10 @@ class OnlineBoard extends React.Component {
       checkMate: true,
       winner: this.state.color,
     });
+  }
+
+  handleOpponentDisconnect() {
+    console.log('opponent disconnect');
   }
 
   handleDrag(startRow, startCol, finRow, finCol) {
@@ -171,6 +179,8 @@ class OnlineBoard extends React.Component {
           tileSize={this.props.tileSize}
           turn={this.state.turn}
           disableDrag={this.state.turn !== this.state.color}
+          searching={this.state.searching}
+          flip={this.state.color === 'black'}
         />
         <div className="bottom-text">
             <span id="turn-indicator">{this.state.turn}'s turn</span>
