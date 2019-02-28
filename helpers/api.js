@@ -10,7 +10,7 @@ var api = function() {
     // Set up callbacks before starting search
     socket.on('found player', data => {
       opp_id = data.opp_id;
-      onFoundPlayerCallback(data.color);
+      onFoundPlayerCallback(data);
     });
     socket.on('update', board => onUpdateCallback(board));
     socket.on('checkmate', () => onCheckMateCallback());

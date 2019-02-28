@@ -1,6 +1,7 @@
 import React from 'react';
 import Board from './Board';
 import Timer from './Timer';
+import GameFinder from './GameFinder';
 import helper from '../helpers/boardHelper';
 import rules from '../helpers/rules';
 import api from '../helpers/api';
@@ -11,6 +12,7 @@ class OnlineBoard extends React.Component {
 
     var startBoard = helper.initializeBoard();
     this.moves = [];
+    this.opponentName = '';
 
     this.state = {
       board: startBoard,
@@ -22,6 +24,7 @@ class OnlineBoard extends React.Component {
       searching: true,
     };
 
+    this.findRandomPlayer = this.findRandomPlayer.bind(this);
     this.handlePlayerFound = this.handlePlayerFound.bind(this);
     this.handleOpponentMove = this.handleOpponentMove.bind(this);
     this.handleOpponentCheckmate = this.handleOpponentCheckmate.bind(this);
@@ -31,22 +34,22 @@ class OnlineBoard extends React.Component {
     this.highlightTargets = this.highlightTargets.bind(this);
   }
 
-  componentDidMount() {
+  findRandomPlayer() {
     api.init(this.handlePlayerFound, this.handleOpponentMove,
              this.handleOpponentCheckmate, this.handleOpponentDisconnect);
   }
 
-  handlePlayerFound(color) {
-    if(color === 'white') {
+  handlePlayerFound(data) {
+    if(data.color === 'white') {
       this.moves = rules.getMoves(this.state.board, 'white');
-    } else {
-      //this.flipBoard();
     }
+
+    this.opponentName = data.opp_id;
 
     this.setState({
       ...this.state,
       searching: false,
-      color: color,
+      color: data.color,
     });
   }
 
@@ -158,35 +161,38 @@ class OnlineBoard extends React.Component {
   render() {
     return (
       <div className="two-board">
-        {this.state.searching &&
-          <p className="checkmate-text">
-            Searching...
-          </p>
+        {!this.state.color &&
+          <GameFinder
+            onRandomClick={this.findRandomPlayer}
+          />
         }
         {this.state.checkMate &&
           <p className="checkmate-text">
             Checkmate, {this.state.winner} wins!
           </p>
         }
-        <Board
-          checkMate={this.state.checkMate}
-          board={this.state.board}
-          handleClick={this.handleClick}
-          handleDrag={this.handleDrag}
-          highlightTargets={this.highlightTargets}
-          highlightedTile={this.state.highlightedTile}
-          reset={this.state.reset}
-          tileSize={this.props.tileSize}
-          turn={this.state.turn}
-          disableDrag={this.state.turn !== this.state.color}
-          searching={this.state.searching}
-          flip={this.state.color === 'black'}
-        />
-        <div className="bottom-text">
-            <span id="turn-indicator">{this.state.turn}'s turn</span>
-            <span>   You are {this.state.color}</span>
-            <Timer id="timer"/>
-        </div>
+        {this.state.color &&
+          <Board
+            checkMate={this.state.checkMate}
+            board={this.state.board}
+            handleClick={this.handleClick}
+            handleDrag={this.handleDrag}
+            highlightTargets={this.highlightTargets}
+            highlightedTile={this.state.highlightedTile}
+            reset={this.state.reset}
+            tileSize={this.props.tileSize}
+            turn={this.state.turn}
+            disableDrag={this.state.turn !== this.state.color}
+            searching={this.state.searching}
+            flip={this.state.color === 'black'}
+          />
+        }
+        {this.state.color &&
+          <div className="bottom-text">
+              <span id="turn-indicator">{this.state.turn === this.state.color ? 'Your turn' : this.opponentName + "'s turn"}</span>
+              <Timer id="timer"/>
+          </div>
+        }
       </div>
     );
   }
