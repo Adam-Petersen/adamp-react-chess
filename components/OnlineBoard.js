@@ -22,21 +22,26 @@ class OnlineBoard extends React.Component {
       checkMate: false,
       winner: null,
       searching: true,
+      opponentDisconnected: false,
     };
 
-    this.findRandomPlayer = this.findRandomPlayer.bind(this);
+    // Game Finder Screen
+    this.handlePlayerFound = this.handlePlayerFound.bind(this);
+
+    // Callbacks for API
     this.handlePlayerFound = this.handlePlayerFound.bind(this);
     this.handleOpponentMove = this.handleOpponentMove.bind(this);
     this.handleOpponentCheckmate = this.handleOpponentCheckmate.bind(this);
     this.handleOpponentDisconnect = this.handleOpponentDisconnect.bind(this);
+
+    // Functions for Board
     this.handleClick = this.handleClick.bind(this);
     this.handleDrag = this.handleDrag.bind(this);
     this.highlightTargets = this.highlightTargets.bind(this);
   }
 
-  findRandomPlayer() {
-    api.init(this.handlePlayerFound, this.handleOpponentMove,
-             this.handleOpponentCheckmate, this.handleOpponentDisconnect);
+  componentDidMount() {
+    api.init(this.handleOpponentMove, this.handleOpponentCheckmate, this.handleOpponentDisconnect);
   }
 
   handlePlayerFound(data) {
@@ -88,7 +93,10 @@ class OnlineBoard extends React.Component {
   }
 
   handleOpponentDisconnect() {
-    console.log('opponent disconnect');
+    this.setState({
+      ...this.state,
+      opponentDisconnected: true,
+    })
   }
 
   handleDrag(startRow, startCol, finRow, finCol) {
@@ -116,6 +124,7 @@ class OnlineBoard extends React.Component {
     });
   }
 
+  // Board callbacks
   handleClick(row, col) {
     if (this.state.checkMate || this.state.searching) {
       return;
@@ -163,13 +172,25 @@ class OnlineBoard extends React.Component {
       <div className="two-board">
         {!this.state.color &&
           <GameFinder
-            onRandomClick={this.findRandomPlayer}
+            handlePlayerFound={this.handlePlayerFound}
+            api={api}
           />
         }
         {this.state.checkMate &&
-          <p className="checkmate-text">
-            Checkmate, {this.state.winner} wins!
-          </p>
+          <div id="overlay-wrapper">
+            <div id="overlay"></div>
+            <p className="overlay-text">
+              Checkmate, {this.state.winner} wins!
+            </p>
+          </div>
+        }
+        {this.state.opponentDisconnected &&
+          <div id="overlay-wrapper">
+            <div id="overlay"></div>
+            <p className="overlay-text">
+              Opponent Disconnected
+            </p>
+          </div>
         }
         {this.state.color &&
           <Board
@@ -189,8 +210,14 @@ class OnlineBoard extends React.Component {
         }
         {this.state.color &&
           <div className="bottom-text">
-              <span id="turn-indicator">{this.state.turn === this.state.color ? 'Your turn' : this.opponentName + "'s turn"}</span>
-              <Timer id="timer"/>
+            <span id="turn-indicator">{this.state.turn === this.state.color ? 'Your turn' : "Opponent's turn"}</span>
+            <Timer id="timer"/>
+          </div>
+        }
+        {!this.state.color &&
+          <div className="bottom-text">
+            <span id="turn-indicator">New Game</span>
+            <span id="timer">00:00</span>
           </div>
         }
       </div>

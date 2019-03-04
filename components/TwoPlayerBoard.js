@@ -111,9 +111,12 @@ class TwoPlayerBoard extends React.Component {
     return (
       <div className="two-board">
         {this.state.checkMate &&
-          <p className="checkmate-text">
-            Checkmate, {this.state.turn} wins!
-          </p>
+          <div id="overlay-wrapper">
+            <div id="overlay"></div>
+            <p className="overlay-text">
+              Checkmate, {this.state.turn} wins!
+            </p>
+          </div>
         }
         <Board
           checkMate={this.state.checkMate}

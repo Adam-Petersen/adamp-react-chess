@@ -21,6 +21,7 @@ class OnePlayerBoard extends React.Component {
       checkMate: false,
       winner: null,
       moveAI: false,
+      lastMove: '',
     };
 
     this.handleClick = this.handleClick.bind(this);
@@ -108,6 +109,7 @@ class OnePlayerBoard extends React.Component {
         ...this.state,
         board: newBoard,
         moveAI: false,
+        lastMove: this.lastMove(aiMove),
         checkMate: this.moves.length === 0,
         winner: this.moves.length === 0 ? 'black' : null,
       });
@@ -124,13 +126,20 @@ class OnePlayerBoard extends React.Component {
     });
   }
 
+  lastMove(move) {
+    return '' + (8 - move.startTile.row) + (String.fromCharCode(97 + move.startTile.col)) + ' -> ' + (8-move.targetTile.row) + (String.fromCharCode(97 + move.targetTile.col));
+  }
+
   render() {
     return (
       <div className="one-board">
         {this.state.checkMate &&
-          <p className="checkmate-text">
-            Checkmate, {this.state.winner} wins!
-          </p>
+          <div id="overlay-wrapper">
+            <div id="overlay"></div>
+            <p className="overlay-text">
+              Checkmate, {this.state.winner} wins!
+            </p>
+          </div>
         }
         <Board
           checkMate={this.state.checkMate}
