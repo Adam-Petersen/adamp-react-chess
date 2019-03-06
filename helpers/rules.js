@@ -1,65 +1,15 @@
-var Rules = (function(){
-  var board, turn;
-
-  var getMoves = function(newBoard, newTurn) {
-    board = newBoard;
-    turn = newTurn;
-
-    return generateValidMoves();
-  }
-
-  var findMove = function(moves, startTile, targetTile) {
-    var foundMove = null;
-    moves.forEach(function(move) {
-      if (move.startTile.id === startTile.id && move.targetTile.id === targetTile.id) {
-        foundMove = move;
-      }
-    });
-    return foundMove;
-  }
-
-  function generateValidMoves(isFutureMove) {
-    var moves = generateValidBishopMoves().concat(
-           generateValidKingMoves()).concat(
-           generateValidKnightMoves()).concat(
-           generateValidPawnMoves()).concat(
-           generateValidQueenMoves()).concat(
-           generateValidRookMoves());
-
-    if (!isFutureMove) {
-      moves.forEach(move => move.futureMoves = generateFutureMoves(move));
-      moves = moves.filter(move => !playerPutsSelfInCheck(move));
-      moves.forEach(move => move.setsCheck = setsCheck(move));
-      moves = moves.map(move => ({...move, futureMoves: null}))
-    }
-    return moves;
-  }
-
-  function generateFutureMoves(move) {
-    //Set varaibles to generate future moves
-    board[move.startTile.row][move.startTile.col] = {...move.startTile, piece: null};
-    board[move.targetTile.row][move.targetTile.col] = {...move.targetTile, piece: move.startTile.piece};
-    var oldTurn = turn;
-    turn = 'both';
-
-    var futureMoves = generateValidMoves(true);
-
-    //Reset variables to what they were
-    board[move.startTile.row][move.startTile.col] = move.startTile;
-    board[move.targetTile.row][move.targetTile.col] = move.targetTile;
-    turn = oldTurn;
-
-    return futureMoves;
-  }
+const Rules = (() => {
+  var board;
+  var turn;
 
   function playerPutsSelfInCheck(move) {
     var putsSelfInCheck = false;
 
-    move.futureMoves.forEach(futureMove => {
-      if (futureMove.targetTile.piece &&
-          futureMove.targetTile.piece.name === 'king'&&
-          futureMove.targetTile.piece.color === turn) {
-            putsSelfInCheck = true;
+    move.futureMoves.forEach((futureMove) => {
+      if (futureMove.targetTile.piece
+          && futureMove.targetTile.piece.name === 'king'
+          && futureMove.targetTile.piece.color === turn) {
+        putsSelfInCheck = true;
       }
     });
 
@@ -69,11 +19,11 @@ var Rules = (function(){
   function setsCheck(move) {
     var check = false;
 
-    move.futureMoves.forEach(futureMove => {
-      if (futureMove.targetTile.piece &&
-        futureMove.targetTile.piece.name === 'king'&&
-        futureMove.targetTile.piece.color !== turn) {
-          check = true;
+    move.futureMoves.forEach((futureMove) => {
+      if (futureMove.targetTile.piece
+        && futureMove.targetTile.piece.name === 'king'
+        && futureMove.targetTile.piece.color !== turn) {
+        check = true;
       }
     });
     return check;
@@ -86,22 +36,21 @@ var Rules = (function(){
   }
 
   function traversePath(startTile, incRow, incCol) {
-    var moves = [];
-    var tile = startTile;
+    let moves = [];
+    let tile = startTile;
 
     while (isValidTile(incRow(tile.row), incCol(tile.col))) {
       tile = board[incRow(tile.row)][incCol(tile.col)];
       if (tile.piece) {
         if (tile.piece.color !== startTile.piece.color) {
           moves.push({
-            startTile: startTile,
-            targetTile: tile
+            startTile,
+            targetTile: tile,
           });
         }
-        return moves;
       } else {
         moves.push({
-          startTile: startTile,
+          startTile,
           targetTile: tile,
         });
       }
@@ -113,26 +62,26 @@ var Rules = (function(){
   function getLivingPieces(pieceType) {
     var livingPieces = [];
 
-    board.forEach(function(row){
-      row.forEach(function(tile){
+    board.forEach((row) => {
+      row.forEach((tile) => {
         if (tile.piece && tile.piece.name === pieceType && (tile.piece.color === turn || turn === 'both')) {
           livingPieces.push(tile);
         }
       });
     });
 
-    return livingPieces
+    return livingPieces;
   }
 
   function generateValidBishopMoves() {
     var livingBishops = getLivingPieces('bishop');
     var moves = [];
 
-    livingBishops.forEach(function(bishopTile){
-      let downRight = traversePath(bishopTile, (row) => row + 1, (col) => col + 1);
-      let downLeft = traversePath(bishopTile, (row) => row + 1, (col) => col - 1);
-      let upRight = traversePath(bishopTile, (row) => row - 1, (col) => col + 1);
-      let upLeft = traversePath(bishopTile, (row) => row - 1, (col) => col - 1);
+    livingBishops.forEach((bishopTile) => {
+      let downRight = traversePath(bishopTile, row => row + 1, col => col + 1);
+      let downLeft = traversePath(bishopTile, row => row + 1, col => col - 1);
+      let upRight = traversePath(bishopTile, row => row - 1, col => col + 1);
+      let upLeft = traversePath(bishopTile, row => row - 1, col => col - 1);
 
       moves = moves.concat(downRight, downLeft, upRight, upLeft);
     });
@@ -144,13 +93,14 @@ var Rules = (function(){
     var kings = getLivingPieces('king');
     var moves = [];
 
-    kings.forEach(function(kingTile){
-      [-1,0,1].forEach(function(rowInc){
-        [-1,0,1].forEach(function(colInc){
-          if((rowInc !== 0 || colInc !== 0) && isValidTile(kingTile.row + rowInc, kingTile.col + colInc)) {
+    kings.forEach((kingTile) => {
+      [-1, 0, 1].forEach((rowInc) => {
+        [-1, 0, 1].forEach((colInc) => {
+          if ((rowInc !== 0 || colInc !== 0)
+              && isValidTile(kingTile.row + rowInc, kingTile.col + colInc)) {
             let tile = board[kingTile.row + rowInc][kingTile.col + colInc];
 
-            if(!tile.piece || tile.piece.color !== kingTile.piece.color) {
+            if (!tile.piece || tile.piece.color !== kingTile.piece.color) {
               moves.push({
                 startTile: kingTile,
                 targetTile: tile,
@@ -168,15 +118,16 @@ var Rules = (function(){
     var livingKnights = getLivingPieces('knight');
     var moves = [];
 
-    livingKnights.forEach(function(knight){
-      [-2,-1,1,2].forEach(function(rowInc){
-        [-2,-1,1,2].forEach(function(colInc){
-          if (Math.abs(rowInc) + Math.abs(colInc) === 3 && isValidTile(knight.row + rowInc, knight.col + colInc)) {
+    livingKnights.forEach((knight) => {
+      [-2, -1, 1, 2].forEach((rowInc) => {
+        [-2, -1, 1, 2].forEach((colInc) => {
+          if (Math.abs(rowInc) + Math.abs(colInc) === 3
+              && isValidTile(knight.row + rowInc, knight.col + colInc)) {
             let tile = board[knight.row + rowInc][knight.col + colInc];
-            if (!tile.piece ||  tile.piece.color !== knight.piece.color) {
+            if (!tile.piece || tile.piece.color !== knight.piece.color) {
               moves.push({
                 startTile: knight,
-                targetTile: tile
+                targetTile: tile,
               });
             }
           }
@@ -265,9 +216,63 @@ var Rules = (function(){
     return moves;
   }
 
+  function generateValidMoves(isFutureMove) {
+    var moves = generateValidBishopMoves().concat(
+           generateValidKingMoves()).concat(
+           generateValidKnightMoves()).concat(
+           generateValidPawnMoves()).concat(
+           generateValidQueenMoves()).concat(
+           generateValidRookMoves());
+
+    if (!isFutureMove) {
+      moves.forEach(move => move.futureMoves = generateFutureMoves(move));
+      moves = moves.filter(move => !playerPutsSelfInCheck(move));
+      moves.forEach(move => move.setsCheck = setsCheck(move));
+      moves = moves.map(move => ({...move, futureMoves: null}))
+    }
+    return moves;
+  }
+
+  function generateFutureMoves(move) {
+    // Set varaibles to generate future moves
+    board[move.startTile.row][move.startTile.col] = { ...move.startTile, piece: null };
+    board[move.targetTile.row][move.targetTile.col] = {
+      ...move.targetTile,
+      piece: move.startTile.piece,
+    };
+    let oldTurn = turn;
+    turn = 'both';
+
+    let futureMoves = generateValidMoves(true);
+
+    // Reset variables to what they were
+    board[move.startTile.row][move.startTile.col] = move.startTile;
+    board[move.targetTile.row][move.targetTile.col] = move.targetTile;
+    turn = oldTurn;
+
+    return futureMoves;
+  }
+
+  function getMoves(newBoard, newTurn) {
+    board = newBoard;
+    turn = newTurn;
+
+    return generateValidMoves();
+  }
+
+  function findMove(moves, startTile, targetTile) {
+    var foundMove = null;
+    moves.forEach((move) => {
+      if (move.startTile.id === startTile.id && move.targetTile.id === targetTile.id) {
+        foundMove = move;
+      }
+    });
+    return foundMove;
+  }
+
   return {
-    getMoves: getMoves,
-    findMove: findMove,
+    getMoves,
+    findMove,
   };
 })();
 

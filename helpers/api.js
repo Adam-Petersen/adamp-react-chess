@@ -1,9 +1,9 @@
 import openSocket from 'socket.io-client';
 
-var opp_id, socket;
+var oppId;
+var socket;
 
-var api = function() {
-
+const api = (() => {
   function init(onUpdateCallback, onCheckMateCallback, onOpponentDisconnectCallback) {
     socket = openSocket('http://adam-petersen.com:9876/');
 
@@ -11,32 +11,30 @@ var api = function() {
     socket.on('update', board => onUpdateCallback(board));
     socket.on('checkmate', () => onCheckMateCallback());
     socket.on('opponent disconnected', () => onOpponentDisconnectCallback());
-    //socket.on('bad host', () => onHostExistsCallback());
-    //socket.on('not hosted', () => onNotHostedCallback());
 
-    // start search
+    // ready to search
   }
 
   function hostGame(gameID, matchFoundCallback, hostExistsCallback) {
     socket.on('bad host', () => hostExistsCallback());
 
-    socket.on('found player', data => {
-      opp_id = data.opp_id;
+    socket.on('found player', (data) => {
+      ({ oppId } = data);
       matchFoundCallback(data);
     });
 
     socket.emit('host game', gameID);
   }
 
-  function removeHost(gameID) {
+  function removeHost() {
     socket.emit('remove host');
   }
 
   function joinGame(gameID, matchFoundCallback, gameNotFoundCallback) {
     socket.on('game not found', () => gameNotFoundCallback());
 
-    socket.on('found player', data => {
-      opp_id = data.opp_id;
+    socket.on('found player', (data) => {
+      ({ oppId } = data);
       matchFoundCallback(data);
     });
 
@@ -44,8 +42,8 @@ var api = function() {
   }
 
   function search(onFoundPlayerCallback) {
-    socket.on('found player', data => {
-      opp_id = data.opp_id;
+    socket.on('found player', (data) => {
+      ({ oppId } = data);
       onFoundPlayerCallback(data);
     });
     socket.emit('searching');
@@ -56,23 +54,23 @@ var api = function() {
   }
 
   function update(board) {
-    socket.emit('update', { opp_id, board });
+    socket.emit('update', { oppId, board });
   }
 
   function checkmate() {
-    socket.emit('checkmate', opp_id);
+    socket.emit('checkmate', oppId);
   }
 
   return {
-    init: init,
-    hostGame: hostGame,
-    removeHost: removeHost,
-    joinGame: joinGame,
-    search: search,
-    removeSearch: removeSearch,
-    update: update,
-    checkmate: checkmate,
-  }
-}();
+    init,
+    hostGame,
+    removeHost,
+    joinGame,
+    search,
+    removeSearch,
+    update,
+    checkmate,
+  };
+})();
 
 export default api;

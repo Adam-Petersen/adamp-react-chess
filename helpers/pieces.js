@@ -1,75 +1,75 @@
-import bishop_black from '../images/bishop_black.svg';
-import bishop_white from '../images/bishop_white.svg';
-import king_black from '../images/king_black.svg';
-import king_white from '../images/king_white.svg';
-import knight_black from '../images/knight_black.svg';
-import knight_white from '../images/knight_white.svg';
-import pawn_black from '../images/pawn_black.svg';
-import pawn_white from '../images/pawn_white.svg';
-import queen_black from '../images/queen_black.svg';
-import queen_white from '../images/queen_white.svg';
-import rook_black from '../images/rook_black.svg';
-import rook_white from '../images/rook_white.svg';
+import bishopBlackImg from '../images/bishop_black.svg';
+import bishopWhiteImg from '../images/bishop_white.svg';
+import kingBlackImg from '../images/king_black.svg';
+import kingWhiteImg from '../images/king_white.svg';
+import knightBlackImg from '../images/knight_black.svg';
+import knightWhiteImg from '../images/knight_white.svg';
+import pawnBlackImg from '../images/pawn_black.svg';
+import pawnWhiteImg from '../images/pawn_white.svg';
+import queenBlackImg from '../images/queen_black.svg';
+import queenWhiteImg from '../images/queen_white.svg';
+import rookBlackImg from '../images/rook_black.svg';
+import rookWhiteImg from '../images/rook_white.svg';
 
 const pieces = {
-  bishop_black: {
-    name: "bishop",
-    image: bishop_black,
+  bishopBlack: {
+    name: 'bishop',
+    image: bishopBlackImg,
     color: 'black',
   },
-  bishop_white: {
-    name: "bishop",
-    image: bishop_white,
+  bishopWhite: {
+    name: 'bishop',
+    image: bishopWhiteImg,
     color: 'white',
   },
-  king_black: {
-    name: "king",
-    image: king_black,
+  kingBlack: {
+    name: 'king',
+    image: kingBlackImg,
     color: 'black',
   },
-  king_white: {
-    name: "king",
-    image: king_white,
+  kingWhite: {
+    name: 'king',
+    image: kingWhiteImg,
     color: 'white',
   },
-  knight_black: {
-    name: "knight",
-    image: knight_black,
+  knightBlack: {
+    name: 'knight',
+    image: knightBlackImg,
     color: 'black',
   },
-  knight_white: {
-    name: "knight",
-    image: knight_white,
+  knightWhite: {
+    name: 'knight',
+    image: knightWhiteImg,
     color: 'white',
   },
-  pawn_black: {
-    name: "pawn",
-    image: pawn_black,
+  pawnBlack: {
+    name: 'pawn',
+    image: pawnBlackImg,
     color: 'black',
   },
-  pawn_white: {
-    name: "pawn",
-    image: pawn_white,
+  pawnWhite: {
+    name: 'pawn',
+    image: pawnWhiteImg,
     color: 'white',
   },
-  queen_black: {
-    name: "queen",
-    image: queen_black,
+  queenBlack: {
+    name: 'queen',
+    image: queenBlackImg,
     color: 'black',
   },
-  queen_white: {
-    name: "queen",
-    image: queen_white,
+  queenWhite: {
+    name: 'queen',
+    image: queenWhiteImg,
     color: 'white',
   },
-  rook_black: {
-    name: "rook",
-    image: rook_black,
+  rookBlack: {
+    name: 'rook',
+    image: rookBlackImg,
     color: 'black',
   },
-  rook_white: {
-    name: "rook",
-    image: rook_white,
+  rookWhite: {
+    name: 'rook',
+    image: rookWhiteImg,
     color: 'white',
   },
 };
