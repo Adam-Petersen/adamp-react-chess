@@ -1,5 +1,5 @@
 import React from 'react';
-import ModeButton from './ModeButton'
+import ModeButton from './ModeButton';
 
 class GameModeSelect extends React.Component {
   constructor(props) {
@@ -10,15 +10,15 @@ class GameModeSelect extends React.Component {
   }
 
   onLocalClick() {
-    this.props.onClick("two");
+    this.props.onClick('two');
   }
 
   onAIClick() {
-    this.props.onClick("one");
+    this.props.onClick('one');
   }
 
   onOnlineClick() {
-    this.props.onClick("online");
+    this.props.onClick('online');
   }
 
   render() {
@@ -28,19 +28,19 @@ class GameModeSelect extends React.Component {
           <div className="mode-select">
             <p className="mode-header"> Select Game Mode </p>
             <ModeButton
-              text={"Local 1v1"}
+              text="Local 1v1"
               disabled={false}
               onClick={this.onLocalClick}
             />
 
             <ModeButton
-              text={"AI mode"}
+              text="AI mode"
               disabled={false}
               onClick={this.onAIClick}
             />
 
             <ModeButton
-              text={"Online Mode"}
+              text="Online Mode"
               disabled={false}
               onClick={this.onOnlineClick}
             />
@@ -50,7 +50,6 @@ class GameModeSelect extends React.Component {
       </div>
     );
   }
-
 }
 
 export default GameModeSelect;

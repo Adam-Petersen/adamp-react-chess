@@ -10,7 +10,7 @@ class OnlineBoard extends React.Component {
   constructor(props) {
     super(props);
 
-    var startBoard = helper.initializeBoard();
+    let startBoard = helper.initializeBoard();
     this.moves = [];
     this.opponentName = '';
 
@@ -45,14 +45,15 @@ class OnlineBoard extends React.Component {
   }
 
   handlePlayerFound(data) {
-    if(data.color === 'white') {
+    if (data.color === 'white') {
       this.moves = rules.getMoves(this.state.board, 'white');
     }
 
     this.opponentName = data.opp_id;
 
+    let oldState = this.state;
     this.setState({
-      ...this.state,
+      ...oldState,
       searching: false,
       color: data.color,
     });
@@ -60,43 +61,44 @@ class OnlineBoard extends React.Component {
 
   handleOpponentMove(newBoard) {
     this.moves = rules.getMoves(newBoard, this.state.color);
+    let oldState = this.state;
 
     if (this.moves.length === 0) {
-      console.log('sending checkmate')
       api.checkmate();
       helper.setTargetHighlights(newBoard, this.moves, null);
       this.setState({
-        ...this.state,
+        ...oldState,
         board: newBoard,
         checkMate: true,
-        winner: this.state.turn,
+        winner: oldState.turn,
         highlightedTile: null,
       });
     } else {
       helper.setTargetHighlights(newBoard, this.moves, null);
       this.setState({
-        ...this.state,
+        ...oldState,
         board: newBoard,
-        turn: this.state.color,
+        turn: oldState.color,
         highlightedTile: null,
       });
     }
   }
 
   handleOpponentCheckmate() {
-    console.log('handle checkmate')
+    let oldState = this.state;
     this.setState({
-      ...this.state,
+      ...oldState,
       checkMate: true,
-      winner: this.state.color,
+      winner: oldState.color,
     });
   }
 
   handleOpponentDisconnect() {
+    let oldState = this.state;
     this.setState({
-      ...this.state,
+      ...oldState,
       opponentDisconnected: true,
-    })
+    });
   }
 
   handleDrag(startRow, startCol, finRow, finCol) {
@@ -104,9 +106,9 @@ class OnlineBoard extends React.Component {
       return;
     }
 
-    var startTile = this.state.board[startRow][startCol];
-    var targetTile = this.state.board[finRow][finCol];
-    var newState = {board: this.state.board};
+    let startTile = this.state.board[startRow][startCol];
+    let targetTile = this.state.board[finRow][finCol];
+    let newState = { board: this.state.board };
 
     if (helper.movePiece(this.state.board, this.moves, startTile, targetTile, newState)) {
       api.update(newState.board);
@@ -118,8 +120,9 @@ class OnlineBoard extends React.Component {
 
     helper.setTargetHighlights(newState.board, this.moves, newState.highlightedTile);
 
+    let oldState = this.state;
     this.setState({
-      ...this.state,
+      ...oldState,
       ...newState,
     });
   }
@@ -130,38 +133,49 @@ class OnlineBoard extends React.Component {
       return;
     }
 
-    var newState = { board: this.state.board };
-    var highlightedTile = this.state.highlightedTile;
+    let newState = { board: this.state.board };
+    let { highlightedTile } = this.state;
     let clickedTile = this.state.board[row][col];
 
     if (highlightedTile) {
-      if(highlightedTile.id === clickedTile.id) {
+      if (highlightedTile.id === clickedTile.id) {
         newState.highlightedTile = null;
-      }
-      else if(clickedTile.piece && clickedTile.piece.color === highlightedTile.piece.color) {
+      } else if (clickedTile.piece && clickedTile.piece.color === highlightedTile.piece.color) {
         newState.highlightedTile = clickedTile;
-      } else if (helper.movePiece(this.state.board, this.moves, highlightedTile, clickedTile, newState)) {
-        api.update(newState.board);
-        newState.turn = helper.nextTurn(this.state.turn);
+      } else {
+        let movePiece = helper.movePiece(
+          this.state.board,
+          this.moves,
+          highlightedTile,
+          clickedTile,
+          newState,
+        );
+        if (movePiece) {
+          api.update(newState.board);
+          newState.turn = helper.nextTurn(this.state.turn);
+        }
       }
-    }
-    else if (clickedTile.piece && clickedTile.piece.color === this.state.color && this.state.turn === this.state.color) {
+    } else if (clickedTile.piece
+        && clickedTile.piece.color === this.state.color
+        && this.state.turn === this.state.color) {
       newState.highlightedTile = clickedTile;
     }
 
     helper.setTargetHighlights(newState.board, this.moves, newState.highlightedTile);
 
+    let oldState = this.state;
     this.setState({
-      ...this.state,
+      ...oldState,
       ...newState,
     });
   }
 
   highlightTargets(row, col) {
-    var newBoard = helper.copyBoard(this.state.board);
+    let oldState = this.state;
+    let newBoard = helper.copyBoard(oldState.board);
     helper.setTargetHighlights(newBoard, this.moves, newBoard[row][col]);
     this.setState({
-      ...this.state,
+      ...oldState,
       board: newBoard,
       highlightedTile: newBoard[row][col],
     });
@@ -170,29 +184,32 @@ class OnlineBoard extends React.Component {
   render() {
     return (
       <div className="two-board">
-        {!this.state.color &&
+        {!this.state.color
+          && (
           <GameFinder
             handlePlayerFound={this.handlePlayerFound}
             api={api}
           />
+          )
         }
-        {this.state.checkMate &&
+        {this.state.checkMate
+          && (
           <div id="overlay-wrapper">
-            <div id="overlay"></div>
-            <p className="overlay-text">
-              Checkmate, {this.state.winner} wins!
-            </p>
+            <div id="overlay" />
+            <p className="overlay-text">{`Checkmate, ${this.state.winner} wins!`}</p>
           </div>
+          )
         }
-        {this.state.opponentDisconnected &&
+        {this.state.opponentDisconnected
+          && (
           <div id="overlay-wrapper">
-            <div id="overlay"></div>
-            <p className="overlay-text">
-              Opponent Disconnected
-            </p>
+            <div id="overlay" />
+            <p className="overlay-text">Opponent Disconnected</p>
           </div>
+          )
         }
-        {this.state.color &&
+        {this.state.color
+          && (
           <Board
             checkMate={this.state.checkMate}
             board={this.state.board}
@@ -207,18 +224,23 @@ class OnlineBoard extends React.Component {
             searching={this.state.searching}
             flip={this.state.color === 'black'}
           />
+          )
         }
-        {this.state.color &&
+        {this.state.color
+          && (
           <div className="bottom-text">
             <span id="turn-indicator">{this.state.turn === this.state.color ? 'Your turn' : "Opponent's turn"}</span>
-            <Timer id="timer"/>
+            <Timer id="timer" />
           </div>
+          )
         }
-        {!this.state.color &&
+        {!this.state.color
+          && (
           <div className="bottom-text">
             <span id="turn-indicator">New Game</span>
             <span id="timer">00:00</span>
           </div>
+          )
         }
       </div>
     );

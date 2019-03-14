@@ -1,6 +1,7 @@
 const Rules = (() => {
   var board;
   var turn;
+  var generateValidMoves;
 
   function playerPutsSelfInCheck(move) {
     var putsSelfInCheck = false;
@@ -142,12 +143,15 @@ const Rules = (() => {
     var livingPawns = getLivingPieces('pawn');
     var moves = [];
 
-    livingPawns.forEach(function(pawnTile){
+    livingPawns.forEach((pawnTile) => {
       let rowInc = pawnTile.piece.color === 'white' ? -1 : 1;
       let startRow = pawnTile.piece.color === 'white' ? 6 : 1;
-      let nextTile = isValidTile(pawnTile.row + rowInc, pawnTile.col) ? board[pawnTile.row + rowInc][pawnTile.col] : null;
-      let diagLeftTile = isValidTile(pawnTile.row + rowInc, pawnTile.col - 1) ? board[pawnTile.row + rowInc][pawnTile.col - 1] : null;
-      let diagRightTile = isValidTile(pawnTile.row + rowInc, pawnTile.col + 1) ? board[pawnTile.row + rowInc][pawnTile.col + 1] : null;
+      let nextTile = isValidTile(pawnTile.row + rowInc, pawnTile.col)
+        ? board[pawnTile.row + rowInc][pawnTile.col] : null;
+      let diagLeftTile = isValidTile(pawnTile.row + rowInc, pawnTile.col - 1)
+        ? board[pawnTile.row + rowInc][pawnTile.col - 1] : null;
+      let diagRightTile = isValidTile(pawnTile.row + rowInc, pawnTile.col + 1)
+        ? board[pawnTile.row + rowInc][pawnTile.col + 1] : null;
 
       if (nextTile && !nextTile.piece) {
         moves.push({
@@ -155,7 +159,8 @@ const Rules = (() => {
           targetTile: nextTile,
         });
 
-        let pastNextTile = isValidTile(nextTile.row + rowInc, nextTile.col) ? board[nextTile.row + rowInc][nextTile.col] : null;
+        let pastNextTile = isValidTile(nextTile.row + rowInc, nextTile.col)
+          ? board[nextTile.row + rowInc][nextTile.col] : null;
         if (pastNextTile && !pastNextTile.piece && pawnTile.row === startRow) {
           moves.push({
             startTile: pawnTile,
@@ -169,7 +174,8 @@ const Rules = (() => {
           targetTile: diagLeftTile,
         });
       }
-      if (diagRightTile && diagRightTile.piece && diagRightTile.piece.color !== pawnTile.piece.color) {
+      if (diagRightTile && diagRightTile.piece
+          && diagRightTile.piece.color !== pawnTile.piece.color) {
         moves.push({
           startTile: pawnTile,
           targetTile: diagRightTile,
@@ -184,15 +190,15 @@ const Rules = (() => {
     var livingQueens = getLivingPieces('queen');
     var moves = [];
 
-    livingQueens.forEach(function(queenTile){
-      let up = traversePath(queenTile, (row) => row - 1, (col) => col);
-      let down = traversePath(queenTile, (row) => row + 1, (col) => col);
-      let left = traversePath(queenTile, (row) => row, (col) => col - 1);
-      let right = traversePath(queenTile, (row) => row, (col) => col + 1);
-      let downRight = traversePath(queenTile, (row) => row + 1, (col) => col + 1);
-      let downLeft = traversePath(queenTile, (row) => row + 1, (col) => col - 1);
-      let upRight = traversePath(queenTile, (row) => row - 1, (col) => col + 1);
-      let upLeft = traversePath(queenTile, (row) => row - 1, (col) => col - 1);
+    livingQueens.forEach((queenTile) => {
+      let up = traversePath(queenTile, row => row - 1, col => col);
+      let down = traversePath(queenTile, row => row + 1, col => col);
+      let left = traversePath(queenTile, row => row, col => col - 1);
+      let right = traversePath(queenTile, row => row, col => col + 1);
+      let downRight = traversePath(queenTile, row => row + 1, col => col + 1);
+      let downLeft = traversePath(queenTile, row => row + 1, col => col - 1);
+      let upRight = traversePath(queenTile, row => row - 1, col => col + 1);
+      let upLeft = traversePath(queenTile, row => row - 1, col => col - 1);
 
       moves = moves.concat(up, down, left, right, downRight, downLeft, upRight, upLeft);
     });
@@ -204,32 +210,15 @@ const Rules = (() => {
     var livingRooks = getLivingPieces('rook');
     var moves = [];
 
-    livingRooks.forEach(function(rookTile){
-      let up = traversePath(rookTile, (row) => row - 1, (col) => col);
-      let down = traversePath(rookTile, (row) => row + 1, (col) => col);
-      let left = traversePath(rookTile, (row) => row, (col) => col - 1);
-      let right = traversePath(rookTile, (row) => row, (col) => col + 1);
+    livingRooks.forEach((rookTile) => {
+      let up = traversePath(rookTile, row => row - 1, col => col);
+      let down = traversePath(rookTile, row => row + 1, col => col);
+      let left = traversePath(rookTile, row => row, col => col - 1);
+      let right = traversePath(rookTile, row => row, col => col + 1);
 
       moves = moves.concat(up, down, left, right);
     });
 
-    return moves;
-  }
-
-  function generateValidMoves(isFutureMove) {
-    var moves = generateValidBishopMoves().concat(
-           generateValidKingMoves()).concat(
-           generateValidKnightMoves()).concat(
-           generateValidPawnMoves()).concat(
-           generateValidQueenMoves()).concat(
-           generateValidRookMoves());
-
-    if (!isFutureMove) {
-      moves.forEach(move => move.futureMoves = generateFutureMoves(move));
-      moves = moves.filter(move => !playerPutsSelfInCheck(move));
-      moves.forEach(move => move.setsCheck = setsCheck(move));
-      moves = moves.map(move => ({...move, futureMoves: null}))
-    }
     return moves;
   }
 
@@ -252,6 +241,27 @@ const Rules = (() => {
 
     return futureMoves;
   }
+
+  generateValidMoves = (isFutureMove) => {
+    var moves = generateValidBishopMoves()
+      .concat(generateValidKingMoves())
+      .concat(generateValidKnightMoves())
+      .concat(generateValidPawnMoves())
+      .concat(generateValidQueenMoves())
+      .concat(generateValidRookMoves());
+
+    if (!isFutureMove) {
+      moves.forEach((move) => {
+        move.futureMoves = generateFutureMoves(move);
+      });
+      moves = moves.filter(move => !playerPutsSelfInCheck(move));
+      moves.forEach((move) => {
+        move.setsCheck = setsCheck(move);
+      });
+      moves = moves.map(move => ({ ...move, futureMoves: null }));
+    }
+    return moves;
+  };
 
   function getMoves(newBoard, newTurn) {
     board = newBoard;

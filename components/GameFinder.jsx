@@ -21,23 +21,41 @@ class GameFinder extends React.Component {
       randomSearch: false,
       hostExists: false,
       gameNotFound: false,
-    }
+    };
   }
 
   onHostChange(e) {
+    let oldState = this.state;
     this.setState({
-      ...this.state,
+      ...oldState,
       hostVal: e.target.value,
       hostExists: false,
-    })
+    });
   }
 
   onJoinChange(e) {
+    let oldState = this.state;
     this.setState({
-      ...this.state,
+      ...oldState,
       joinVal: e.target.value,
       gameNotFound: false,
-    })
+    });
+  }
+
+  onRandomClick() {
+    if (this.state.creatingHost) {
+      this.props.api.removeHost();
+    }
+
+    let oldState = this.state;
+    this.setState({
+      ...oldState,
+      creatingHost: false,
+      joiningGame: false,
+      randomSearch: true,
+    });
+
+    this.props.api.search(this.props.handlePlayerFound);
   }
 
   onHostGoClick() {
@@ -45,21 +63,14 @@ class GameFinder extends React.Component {
       this.props.api.removeSearch();
     }
 
+    let oldState = this.state;
     this.setState({
-      ...this.state,
+      ...oldState,
       creatingHost: true,
       joiningGame: false,
       randomSearch: false,
     });
     this.props.api.hostGame(this.state.hostVal, this.props.handlePlayerFound, this.hostExists);
-  }
-
-  hostExists() {
-    this.setState({
-      ...this.state,
-      creatingHost: false,
-      hostExists: true,
-    })
   }
 
   onJoinGoClick() {
@@ -70,40 +81,40 @@ class GameFinder extends React.Component {
       this.props.api.removeSearch();
     }
 
+    let oldState = this.state;
     this.setState({
-      ...this.state,
+      ...oldState,
       creatingHost: false,
       joiningGame: true,
       randomSearch: false,
     });
 
-    setTimeout(function() {this.props.api.joinGame(this.state.joinVal, this.props.handlePlayerFound, this.gameNotFound)}.bind(this),
-      500);
+    setTimeout(() => {
+      this.props.api.joinGame(
+        this.state.joinVal,
+        this.props.handlePlayerFound,
+        this.gameNotFound,
+      );
+    }, 500);
+  }
+
+  hostExists() {
+    let oldState = this.state;
+    this.setState({
+      ...oldState,
+      creatingHost: false,
+      hostExists: true,
+    });
   }
 
   gameNotFound() {
+    let oldState = this.state;
     this.setState({
-      ...this.state,
+      ...oldState,
       joiningGame: false,
       gameNotFound: true,
-    })
-  }
-
-  onRandomClick() {
-    if (this.state.creatingHost) {
-      this.props.api.removeHost();
-    }
-
-    this.setState({
-      ...this.state,
-      creatingHost: false,
-      joiningGame: false,
-      randomSearch: true,
     });
-
-    this.props.api.search(this.props.handlePlayerFound)
   }
-
 
   render() {
     return (
@@ -116,17 +127,21 @@ class GameFinder extends React.Component {
             <div className="input-line">
               <input
                 className={`game-finder-input ${this.state.hostExists ? 'error' : ''}`}
-                type="text" placeholder="Enter a game id"
-                value={this.state.hostExists ? "Host already exists" : this.state.hostVal} onChange={this.onHostChange}
+                type="text"
+                placeholder="Enter a game id"
+                value={this.state.hostExists ? 'Host already exists' : this.state.hostVal}
+                onChange={this.onHostChange}
               />
               <button type="button" onClick={this.onHostGoClick}>
-                {!this.state.creatingHost &&
-                  <p>Go</p>
+                {!this.state.creatingHost
+                  && <p>Go</p>
                 }
-                {this.state.creatingHost &&
-                  <div className="host-loader">
-                  <img src="/images/loader.gif"></img>
-                  </div>
+                {this.state.creatingHost
+                  && (
+                    <div className="host-loader">
+                      <img alt="loader" src="/images/loader.gif" />
+                    </div>
+                  )
                 }
               </button>
             </div>
@@ -137,17 +152,21 @@ class GameFinder extends React.Component {
             <div className="input-line">
               <input
                 className={`game-finder-input ${this.state.gameNotFound ? 'error' : ''}`}
-                type="text" placeholder="Enter a game id"
-                value={this.state.gameNotFound ? "Game not found" : this.state.joinVal} onChange={this.onJoinChange}
+                type="text"
+                placeholder="Enter a game id"
+                value={this.state.gameNotFound ? 'Game not found' : this.state.joinVal}
+                onChange={this.onJoinChange}
               />
               <button type="button" onClick={this.onJoinGoClick}>
-                {!this.state.joiningGame &&
-                  <p>Go</p>
+                {!this.state.joiningGame
+                  && <p>Go</p>
                 }
-                {this.state.joiningGame &&
-                  <div className="host-loader">
-                  <img src="/images/loader.gif"></img>
-                  </div>
+                {this.state.joiningGame
+                  && (
+                    <div className="host-loader">
+                      <img alt="loader" src="/images/loader.gif" />
+                    </div>
+                  )
                 }
               </button>
             </div>
@@ -157,17 +176,18 @@ class GameFinder extends React.Component {
 
           <button id="random-button" type="button" onClick={this.onRandomClick} disabled={this.state.randomSearch}>
             <span>Join Random Game</span>
-            {this.state.randomSearch &&
-              <div className="loader">
-              <img src="/images/loader.gif"></img>
-              </div>
+            {this.state.randomSearch
+              && (
+                <div className="loader">
+                  <img alt="loader" src="/images/loader.gif" />
+                </div>
+              )
             }
           </button>
         </div>
       </div>
     );
   }
-
 }
 
 export default GameFinder;

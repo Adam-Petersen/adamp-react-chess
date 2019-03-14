@@ -6,13 +6,15 @@ import AI from '../helpers/AI';
 import helper from '../helpers/boardHelper';
 
 class OnePlayerBoard extends React.Component {
+  static lastMove(move) {
+    return `${8 - move.startTile.row}${String.fromCharCode(97 + move.startTile.col)} -> ${8 - move.targetTile.row}${String.fromCharCode(97 + move.targetTile.col)}`;
+  }
+
   constructor(props) {
     super(props);
 
-    var startBoard = helper.initializeBoard();
+    let startBoard = helper.initializeBoard();
     this.moves = rules.getMoves(startBoard, 'white');
-
-    var startTime = (new Date).getTime();
 
     this.state = {
       board: startBoard,
@@ -40,9 +42,9 @@ class OnePlayerBoard extends React.Component {
       return;
     }
 
-    var newState = {board: this.state.board};
-    var startTile = this.state.board[startRow][startCol];
-    var targetTile = this.state.board[finRow][finCol];
+    let newState = { board: this.state.board };
+    let startTile = this.state.board[startRow][startCol];
+    let targetTile = this.state.board[finRow][finCol];
 
     if (helper.movePiece(this.state.board, this.moves, startTile, targetTile, newState)) {
       newState.moveAI = true;
@@ -53,8 +55,9 @@ class OnePlayerBoard extends React.Component {
 
     helper.setTargetHighlights(newState.board, this.moves, newState.highlightedTile);
 
+    let oldState = this.state;
     this.setState({
-      ...this.state,
+      ...oldState,
       ...newState,
     });
   }
@@ -64,49 +67,58 @@ class OnePlayerBoard extends React.Component {
       return;
     }
 
-    var newState = { board: this.state.board };
-    var highlightedTile = this.state.highlightedTile;
+    let newState = { board: this.state.board };
+    let { highlightedTile } = this.state;
     let clickedTile = this.state.board[row][col];
 
 
     if (highlightedTile) {
-      if(highlightedTile.id === clickedTile.id) {
+      if (highlightedTile.id === clickedTile.id) {
         newState.highlightedTile = null;
-      }
-      else if(clickedTile.piece && clickedTile.piece.color === 'white') {
+      } else if (clickedTile.piece && clickedTile.piece.color === 'white') {
         newState.highlightedTile = clickedTile;
-      } else if (helper.movePiece(this.state.board, this.moves, highlightedTile, clickedTile, newState)) {
-        newState.moveAI = true;
+      } else {
+        let movePiece = helper.movePiece(
+          this.state.board,
+          this.moves,
+          highlightedTile,
+          clickedTile,
+          newState,
+        );
+        if (movePiece) {
+          newState.moveAI = true;
+        }
       }
-    }
-    else if (clickedTile.piece && clickedTile.piece.color === 'white') {
+    } else if (clickedTile.piece && clickedTile.piece.color === 'white') {
       newState.highlightedTile = clickedTile;
     }
 
     helper.setTargetHighlights(newState.board, this.moves, newState.highlightedTile);
 
+    let oldState = this.state;
     this.setState({
-      ...this.state,
+      ...oldState,
       ...newState,
     });
   }
 
   moveAI() {
-    var aiMove = AI.getAIMove(this.state.board);
+    let aiMove = AI.getAIMove(this.state.board);
+    let oldState = this.state;
 
     if (!aiMove) {
       this.setState({
-        ...this.state,
+        ...oldState,
         checkMate: true,
         winner: 'white',
         moveAI: false,
       });
     } else {
-      var newBoard = helper.getNewBoard(this.state.board, aiMove.startTile, aiMove.targetTile);
+      let newBoard = helper.getNewBoard(oldState.board, aiMove.startTile, aiMove.targetTile);
       this.moves = rules.getMoves(newBoard, 'white');
 
       this.setState({
-        ...this.state,
+        ...oldState,
         board: newBoard,
         moveAI: false,
         lastMove: this.lastMove(aiMove),
@@ -117,29 +129,26 @@ class OnePlayerBoard extends React.Component {
   }
 
   highlightTargets(row, col) {
-    var newBoard = helper.copyBoard(this.state.board);
+    let oldState = this.state;
+    let newBoard = helper.copyBoard(oldState.board);
     helper.setTargetHighlights(newBoard, this.moves, newBoard[row][col]);
     this.setState({
-      ...this.state,
+      ...oldState,
       board: newBoard,
       highlightedTile: newBoard[row][col],
     });
   }
 
-  lastMove(move) {
-    return '' + (8 - move.startTile.row) + (String.fromCharCode(97 + move.startTile.col)) + ' -> ' + (8-move.targetTile.row) + (String.fromCharCode(97 + move.targetTile.col));
-  }
-
   render() {
     return (
       <div className="one-board">
-        {this.state.checkMate &&
+        {this.state.checkMate
+          && (
           <div id="overlay-wrapper">
-            <div id="overlay"></div>
-            <p className="overlay-text">
-              Checkmate, {this.state.winner} wins!
-            </p>
+            <div id="overlay" />
+            <p className="overlay-text">{`Checkmate, ${this.state.winner} wins!`}</p>
           </div>
+          )
         }
         <Board
           checkMate={this.state.checkMate}
@@ -150,11 +159,11 @@ class OnePlayerBoard extends React.Component {
           highlightedTile={this.state.highlightedTile}
           reset={this.state.reset}
           tileSize={this.props.tileSize}
-          turn={'white'}
+          turn="white"
         />
         <div className="bottom-text">
-            <span id="turn-indicator">white's turn</span>
-            <Timer id="timer"/>
+          <span id="turn-indicator">Your turn</span>
+          <Timer id="timer" />
         </div>
       </div>
     );
